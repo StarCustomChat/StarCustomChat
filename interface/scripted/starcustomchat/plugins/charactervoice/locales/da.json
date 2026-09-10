@@ -3,6 +3,7 @@
     "settings.plugins.charactervoice.enable": "Actief",
     "settings.plugins.charactervoice.enablewhisper": "Privéstem",
     "settings.plugins.charactervoice.pitch": "Toonhoogte",
+    "settings.plugins.charactervoice.volume": "Volume",
     "settings.plugins.charactervoice.test": "Voorbeeld",
     "settings.plugins.charactervoice.description": "Wanneer je een bericht verstuurt, krijgt jouw karakter onderstaande stem.",
     "settings.plugins.charactervoice.wisperDescription": "Wanneer je een privébericht stuurt, krijgt jouw karakter onderstaande stem.",

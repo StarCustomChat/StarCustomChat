@@ -7,7 +7,6 @@ stickers = SettingsPluginClass:new(
 
 -- Settings
 function stickers:init()
-  self:_loadConfig()
   self.savedStickers = root.getConfiguration("scc_saved_stickers") or {}
 end
 

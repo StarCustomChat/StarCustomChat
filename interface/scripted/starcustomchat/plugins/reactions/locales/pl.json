@@ -1,6 +1,5 @@
 {
     "chat.commands.add_reaction": "Dodaj reakcję",
-    "reactions.reactselect.hint": "Wyszukaj...",
     "reactions.reactselect.all":  "Wszystkie",
     "reactions.reactselect.recent": "Ostatnie"
 }

@@ -7,14 +7,16 @@
   "chat.modes.Whisper": "Susurro",
   "chat.modes.RadioMessage": "MensajeDeRadio",
   "chat.modes.CommandResult": "ResultadoDeComando",
+  "chat.message.edited": "edited",
 
   "chat.textbox.hint": "Escribe aquí",
+  "chat.textbox.hint.filter": "Filtrar mensajes (\"%s\")",
 
   "chat.buttons.bottom": "Hacia abajo",
   "chat.buttons.settings": "Ajustes",
   "chat.buttons.hide": "Ocultar chat",
-  "chat.buttons.bigger_chat": "Chat más grande",
   "chat.buttons.move_chat": "Mover chat",
+  "chat.buttons.resize_chat": "Cambiar tamaño del chat",
 
   "chat.alerts.dm_not_specified": "Elije al destinatario",
   "chat.alerts.dm_not_found": "Este jugador tiene que estar en el mismo planeta",
@@ -47,6 +49,12 @@
   "settings.back": "Atrás",
   "settings.add": "Añadir",
   "settings.remove": "Eliminar",
+  "settings.search": "Buscar...",
+
+
+  "chat.commands.unknown_argument": "Argumento desconocido: %s",
+  "chat.commands.unknown_argument_expected": "Argumento desconocido: %s, se admiten %s",
+
 
   "commands.general.admin": "Activa o desactiva el modo administrador, que habilita todas las recetas de creación, evita el daño o la pérdida de energía y permite el acceso a comandos solo para administradores.",
   "commands.general.help": "Usa /help nombreComando para obtener documentación detallada.",
@@ -116,19 +124,6 @@
   "commands.debug.togglelayer": "Activa o desactiva una capa.",
   "commands.debug.upgradeship": "Mejora la nave.",
 
-  "commands.starextentions.binds": "Muestra todas las combinaciones de teclas.",
-  "commands.starextentions.breathing": "Activa o desactiva la respiración.",
-  "commands.starextentions.guide": "Muestra la guía.",
-  "commands.starextentions.voice": "Activa o desactiva el chat de voz.",
-  "commands.starextentions.swap": "Cambia el personaje actual.",
-  "commands.starextentions.editor": "Abre el editor.",
-  "commands.starextentions.identity": "Gestiona la configuración de identidad.",
-  "commands.starextentions.identity.set": "Establece atributos de identidad.",
-  "commands.starextentions.identity.get": "Obtiene atributos de identidad.",
-  "commands.starextentions.speech": "Activa o desactiva el habla.",
-  "commands.starextentions.nightvision": "Activa o desactiva la visión nocturna.",
-  "commands.starextentions.render": "Renderiza varias partes del personaje y las copia al portapapeles.",
-
   "commands.openstarbound.swap": "Cambia el personaje actual.",
   "commands.openstarbound.identity": "Gestiona la configuración de identidad.",
   "commands.openstarbound.identity.set": "Establece atributos de identidad.",
@@ -136,6 +131,7 @@
   "commands.openstarbound.render": "Renderiza varias partes del personaje y las guarda en la carpeta de almacenamiento.",
 
   "commands.starcustomchat.clearchat": "Limpia el historial del chat.",
+  "commands.starcustomchat.filter": "Filtra los mensajes por subcadena. Envía un mensaje vacío para desactivar el filtrado.",
 
   "commands.custom.hotreload": "Recarga la configuración."
 }

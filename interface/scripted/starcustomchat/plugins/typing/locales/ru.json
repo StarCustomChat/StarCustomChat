@@ -1,0 +1,9 @@
+{
+    "chat.typing.typing_one": "%s печатает",
+    "chat.typing.typing_few": "%s и %s печатают",
+    "chat.typing.typing_multiple": "Несколько людей печатают",
+
+    "settings.plugins.typing": "Статус печатания",
+    "settings.plugins.typing.player_portraits": "Индикаторы на портретах\n^gray;(Только в Полном режиме)",
+    "settings.plugins.typing.status_message": "Статус-сообщение"
+}

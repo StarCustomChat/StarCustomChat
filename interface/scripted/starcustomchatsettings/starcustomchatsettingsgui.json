@@ -1,7 +1,6 @@
 {
   "gui" : {
     "background" : {
-      "zlevel" : -10,
       "type" : "background",
       "fileBody" : "/interface/scripted/starcustomchatsettings/body.png",
       "fileHeader" : "/interface/scripted/starcustomchatsettings/header.png",
@@ -23,8 +22,7 @@
       "icon" : {
         "type" : "image",
         "file" : "",
-        "position" : [0, 0],
-        "zlevel" : -1
+        "position" : [0, 0]
       }
     },
 
@@ -106,9 +104,10 @@
 
     "btnLanguage": {
       "type": "button",
-      "base" : "/interface/scripted/starcustomchatsettings/flags/en.png",
-      "hover" : "/interface/scripted/starcustomchatsettings/flags/en.png?brightness=90",
+      "base" : "/interface/scripted/starcustomchatsettings/images/flags/en.png",
+      "hover" : "/interface/scripted/starcustomchatsettings/images/flags/en.png?brightness=90",
       "position": [200, 152],
+      "zlevel": -1,
       "callback": "toggleLanguageSelection",
       "data": {
         "displayText": "settings.change_language"
@@ -118,14 +117,13 @@
     "lytSelectLanguage": {
       "type": "layout",
       "visible": false,
-      "zlevel": 99,
       "layoutType": "basic",
       "size": [32, 85],
       "position": [194, 66],
       "children": {
         "background": {
           "type": "image",
-          "file": "/interface/scripted/starcustomchatsettings/languageselect/background.png",
+          "file": "/interface/scripted/starcustomchatsettings/images/languageselect/background.png",
           "position": [0, 0]
         },
         "saLanguages": {
@@ -162,17 +160,17 @@
               "schema": {
                 "spacing" : [0, 10],
                 "memberSize" : [17, 12],
-                "selectedBG" : "/interface/scripted/starcustomchatsettings/languageselect/listitemselected.png",
-                "unselectedBG" : "/interface/scripted/starcustomchatsettings/languageselect/listitem.png",
+                "selectedBG" : "/interface/scripted/starcustomchatsettings/images/languageselect/listitemselected.png",
+                "unselectedBG" : "/interface/scripted/starcustomchatsettings/images/languageselect/listitem.png",
                 "listTemplate": {
                   "background": {
                     "type": "image",
                     "position": [0, 0],
-                    "file": "/interface/scripted/starcustomchatsettings/languageselect/listitem.png"
+                    "file": "/interface/scripted/starcustomchatsettings/images/languageselect/listitem.png"
                   },
                   "language" : {
                     "type": "image",
-                    "file": "/interface/scripted/starcustomchatsettings/flags/en.png",
+                    "file": "/interface/scripted/starcustomchatsettings/images/flags/en.png",
                     "position": [1, 1],
                     "data": {
                       "displayPlainText": "???"
@@ -199,7 +197,7 @@
     }
   },
   "scriptWidgetCallbacks": ["_generalCallback", "_generalSpinnerCallback.up", "toggleLanguageSelection", "changePluginPage", "_generalSpinnerCallback.down", "setLanguage", 
-    "comboboxSelect", "comboboxClick", "comboboxFilter", "_generalTextBoxCallback", "_generalTextBoxCallbackEnter", "_generalTextBoxCallbackEscape",
+    "_generalTextBoxCallback", "_generalTextBoxCallbackEnter", "_generalTextBoxCallbackEscape",
     "scrollPluginsSAUp", "scrollPluginsSADown"
   ],
 

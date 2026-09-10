@@ -1,0 +1,9 @@
+{
+    "chat.typing.typing_one": "%s está escribiendo",
+    "chat.typing.typing_few": "%s y %s están escribiendo",
+    "chat.typing.typing_multiple": "Varias personas están escribiendo",
+
+    "settings.plugins.typing": "Indicador de escritura",
+    "settings.plugins.typing.player_portraits": "Indicadores de escritura con retratos\n^gray;(solo en modo moderno)",
+    "settings.plugins.typing.status_message": "Mensaje de estado de escritura"
+}

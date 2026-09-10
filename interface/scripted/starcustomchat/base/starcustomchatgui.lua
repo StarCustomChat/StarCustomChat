@@ -2,37 +2,30 @@ require "/scripts/messageutil.lua"
 require "/scripts/scctimer.lua"
 require "/scripts/util.lua"
 require "/scripts/rect.lua"
+require "/interface/StarboundTextboxInterface/animatedWidgets.lua"
 require "/interface/scripted/starcustomchat/base/chat_class.lua"
 require "/interface/scripted/starcustomchat/base/starcustomchatutils.lua"
+require "/interface/scripted/starcustomchat/plugin.lua"
 require "/interface/scripted/starcustomchat/chatbuilder.lua"
 require "/interface/scripted/starcustomchat/base/contextmenu/contextmenu.lua"
 require "/interface/scripted/starcustomchat/base/dmtab/dmtab.lua"
-
-local handlerCutter = nil
+require "/interface/scripted/starcustomchat/base/commandpreview/commandpreview.lua"
+require "/interface/scripted/starcustomchat/base/utils/config.lua"
 
 ICChatTimer = TimerKeeper.new()
-function init()
 
-  self.isOpenSB = root.assetOrigin and root.assetOrigin("/opensb/coconut.png")
-  self.isOSBXSB = self.isOpenSB or xsb
+function init()
+  Configuration = __Config:init()
   
-  self.chatFunctionCallback = function(message)
-    self.customChat:addMessage(message)
-  end
-  
-  if not self.isOSBXSB then
-    require("/scripts/starextensions/lib/chat_callback.lua")
-    handlerCutter = setChatMessageHandler(self.chatFunctionCallback)
-    starcustomchat.utils.setSharedValue("dismissPane", pane.dismiss)
-  else
-    self.drawingCanvas = interface.bindCanvas("chatInterfaceCanvas")
-  end
+  self.drawingCanvas = interface.bindCanvas("chatInterfaceCanvas")
 
   self.canvasName = "chatLog"
   self.highlightCanvasName = "cnvHighlightCanvas"
+  self.topCanvasName = "cnvTopCanvas"
+
   self.chatWindowWidth = widget.getSize("saScrollArea")[1]
 
-  self.availableCommands = root.assetJson("/interface/scripted/starcustomchat/base/commands.config")
+  local availableCommands = root.assetJson("/interface/scripted/starcustomchat/base/commands.config")
 
   local chatConfig = root.assetJson("/interface/scripted/starcustomchat/base/chat.config")
 
@@ -66,7 +59,7 @@ function init()
     end
 
     if pluginConfig.commands then
-      self.availableCommands = sb.jsonMerge(self.availableCommands, {pluginName = root.assetJson(pluginConfig.commands)})
+      availableCommands = sb.jsonMerge(availableCommands, {[pluginName] = root.assetJson(pluginConfig.commands)})
     end
 
     for _, localeConfig in ipairs(availableLocales) do 
@@ -82,22 +75,18 @@ function init()
   end
 
   self.runCallbackForPlugins = function(method, ...)
-    -- The logic here is actually strange and might need some more customisation
-    local result = nil
-    for _, plugin in ipairs(plugins) do 
-      result = plugin[method](plugin, ...) or result
-    end
-    return result
+    return PluginClass:runCallbacks(plugins, method, ...)
   end
 
   starcustomchat.utils.buildLocale(localePluginConfig)
-  localeChat()
 
   chatConfig.fontSize = root.getConfiguration("icc_font_size") or chatConfig.fontSize
-  local expanded = root.getConfiguration("icc_is_expanded", false) or config.getParameter("expanded") or false
-  
 
-  createTotallyFakeWidgets(chatConfig.wrapWidthFullMode, chatConfig.wrapWidthCompactMode, chatConfig.fontSize)
+  self.chatSizeSettings = loadChatSizeSettings(chatConfig)
+  if pane.setSize then
+    applyChatSizeSettings(chatConfig, self.chatSizeSettings)
+    applyWidgetSizeSettings(chatConfig)
+  end
 
   local storedMessages = root.getConfiguration("icc_last_messages", jarray())
 
@@ -107,32 +96,36 @@ function init()
 
   local maxCharactersAllowed = root.getConfiguration("icc_max_allowed_characters") or 0
 
-  self.customChat = StarCustomChat:create(self.canvasName, "cnvBackgroundCanvas", self.highlightCanvasName,
-    chatConfig, storedMessages, self.chatMode,
-    expanded, config.getParameter("portraits"), config.getParameter("connectionToUuid"), config.getParameter("chatLineOffset"), maxCharactersAllowed, 
+  local chatMode = root.getConfiguration("sccMode") or "modern"
+  if chatMode ~= "compact" then chatMode = "modern" end
+
+  self.customChat = StarCustomChat:create(self.canvasName, "cnvBackgroundCanvas", self.highlightCanvasName, self.topCanvasName,
+    chatConfig, storedMessages, chatMode,
+    config.getParameter("portraits"), config.getParameter("connectionToUuid"), config.getParameter("chatLineOffset"), maxCharactersAllowed, 
     sb.jsonMerge(config.getParameter("defaultColors"), root.getConfiguration("scc_custom_colors") or {}), self.runCallbackForPlugins)
 
 
+  createTotallyFakeWidgets(chatConfig.wrapWidthFullMode, chatConfig.wrapWidthCompactMode, chatConfig.fontSize, self.customChat:getFont("chattext"))
   self.runCallbackForPlugins("init", self.customChat)
-    
-  setSizes(expanded, chatConfig, config.getParameter("currentSizes"))
+  localeChat()
+  setSizes(chatConfig)
 
   self.lastCommand = root.getConfiguration("icc_last_command")
-  self.tooltipFields = {}
 
-  self.savedCommandSelection = 0
+  self.commandPreview = CommandPreview:new(self.customChat, availableCommands)
 
   self.selectedMessage = nil
   self.sentMessages = root.getConfiguration("icc_my_messages") or jarray()
   self.sentMessagesLimit = 15
   self.currentSentMessage = nil
+  self.recalledSentMessage = nil
 
   contextMenu_init(config.getParameter("contextMenuButtons"))
 
   local lastText = config.getParameter("lastInputMessage")
   if lastText and lastText ~= "" then
-    widget.setText("tbxInput", lastText)
-    widget.focus("tbxInput")
+    self.customChat:setText(lastText)
+    self.customChat:focusInput()
   end
 
   local currentMessageMode = config.getParameter("currentMessageMode") or root.getConfiguration("scc_message_mode")
@@ -146,8 +139,6 @@ function init()
   end
 
   createPromiseFunction()
-  
-  requestPortraits()
 
   self.customChat:drawBackground()
   self.customChat:processQueue()
@@ -159,21 +150,28 @@ function init()
   end
 
   if config.getParameter("forceFocus") then
-    widget.focus("tbxInput")
+    self.customChat:focusInput()
   end
 
-  widget.setFontColor("tbxInput", self.customChat:getColor("chattext"))
+  self.customChat:setTextColor(self.customChat:getColor("chattext"))
 
   -- Apparently, we don't know on init if we're admin or not.
-  ICChatTimer:add(0.2, disableAdminModes)
+  starcustomchat.utils.runWhenPlayerReady(disableAdminModes)
 
+  if (pane.setPosition or pane.setSize) and not self.drawingCanvas and interface.bindCanvas then
+    bindChatInterfaceCanvas()
+  end
 
   if pane.setPosition then
     widget.setVisible("btnMoveChat", true)
     ICChatTimer:add(0.1, function()
-      local newPosition = root.getConfiguration("scc_chat_position") or {0, 0}
+      local newPosition = root.getConfiguration("scc_chat_position") or {3, 5}
       pane.setPosition(newPosition)
     end)
+  end
+
+  if pane.setSize and pane.getSize and pane.getPosition then
+    widget.setVisible("btnResizeChat", true)
   end
 
   if widget.getScrollOffset then
@@ -185,7 +183,23 @@ function init()
 
   self.DMTab = DMTab:new(self.customChat)
   self.DMTab:checkDMs(config.getParameter("DMingPlayerID"))
+
+  startConfigurationTracking()
 end
+
+function startConfigurationTracking()
+    --Saving mechanism
+  local function saveConfiguration()
+    ICChatTimer:add(self.customChat.config.savingPeriod, function()
+      if Configuration:hasPendingChanges() then
+        Configuration:save()
+      end
+      saveConfiguration()
+    end)
+  end
+  saveConfiguration()
+end
+
 
 function selectPlayer(...)
   return self.DMTab and self.DMTab:selectPlayer(...)
@@ -268,18 +282,6 @@ function registerCallbacks()
     end
   end))
 
-  starcustomchat.utils.setMessageHandler("scc_set_message_bigchat", localHandler(function(text)
-    widget.focus("tbxInput")
-    if text and utf8.len(text) > 0 then
-      widget.setText("tbxInput", text)
-      textboxCallback()
-    else
-      if widget.getText("tbxInput") == "" then
-        blurTextbox("tbxInput")
-      end
-    end
-  end))
-
   starcustomchat.utils.setMessageHandler("scc_add_message", simpleHandler(function(message)
     self.customChat:addMessage(message)
   end))
@@ -299,9 +301,26 @@ function registerCallbacks()
     end
   end))
 
+  starcustomchat.utils.setMessageHandler( "scc_set_settings", localHandler(function(data)
+    if data.scope == "root" then
+      Configuration:setRootValue(data.parameter, data.value)
+    elseif data.scope == "player" then
+      Configuration:setPlayerValue(data.parameter, data.value)
+    else 
+      sb.logError("Unknown scope: %s", data.scope)
+      return
+    end
+
+    self.runCallbackForPlugins("onSettingsUpdate", data)
+  end))
+
   starcustomchat.utils.setMessageHandler( "scc_reset_settings", localHandler(function(data)
     starcustomchat.utils.getLocale()
-    createTotallyFakeWidgets(self.customChat.config.wrapWidthFullMode, self.customChat.config.wrapWidthCompactMode, root.getConfiguration("icc_font_size") or self.customChat.config.fontSize)
+    createTotallyFakeWidgets(self.customChat.config.wrapWidthFullMode, 
+      self.customChat.config.wrapWidthCompactMode, 
+      root.getConfiguration("icc_font_size") or self.customChat.config.fontSize, 
+      self.customChat:getFont("chattext")
+    )
     self.runCallbackForPlugins("onSettingsUpdate", data)
     
     localeChat()
@@ -316,10 +335,15 @@ function registerCallbacks()
     self.customChat:clearHistory()
   end))
 
+  starcustomchat.utils.setMessageHandler( "/filter", localHandler(function(data)
+    self.customChat:setFilter(data)
+  end))
+
   starcustomchat.utils.setMessageHandler("scc_edit_message", function(_, _, data)
     local msgInd = self.customChat:findMessageByUUID(data.uuid)
     if msgInd then
-      data = self.customChat.callbackPlugins("formatIncomingMessage", data)
+      data.edited = true
+      data = self.customChat.callbackPlugins("editMessage", data)
       local message = self.customChat.messages[msgInd]
       message.text = data.text
       message.mode = data.mode
@@ -332,7 +356,7 @@ function registerCallbacks()
         message.forceAvatar = true
       end
 
-      local newUUID = util.hashString(data.connection .. data.text)
+      local newUUID = self.customChat:calculateUUID(data)
       local oldUUID = message.uuid
       self.customChat:replaceUUID(oldUUID, newUUID)
 
@@ -346,9 +370,17 @@ function registerCallbacks()
     end
   end))
 
+  starcustomchat.utils.setMessageHandler("scc_stagehand_commandlist", simpleHandler(function(commandList, pluginName)
+    self.commandPreview:add({ [pluginName or "serverside"] = commandList })
+  end))
+
   self.runCallbackForPlugins("registerMessageHandlers")
   self.runCallbackForPlugins("_requestStagehandHandlers")
+  self.runCallbackForPlugins("_requestCommands")
 
+  -- We should request the portraits (ours too) only after we are ready to accept them
+  requestPortraits()
+  Configuration:reset()
   return true
 end
 
@@ -356,7 +388,7 @@ function requestPortraits()
   local messages = self.customChat:getMessages()
   local authors = {}
 
-  -- First, gather the unique connetcions
+  -- First, gather the unique connections
   for _, msg in ipairs(messages) do
     local conn = msg.connection
     if conn and conn ~= 0 and not authors[conn] then
@@ -369,7 +401,7 @@ function requestPortraits()
   end
 end
 
-function createTotallyFakeWidgets(wrapWidthFullMode, wrapWidthCompactMode, fontSize)
+function createTotallyFakeWidgets(wrapWidthFullMode, wrapWidthCompactMode, fontSize, font)
   pane.removeWidget("totallyFakeLabelFullMode")
   pane.removeWidget("totallyFakeLabelCompactMode")
 
@@ -377,13 +409,15 @@ function createTotallyFakeWidgets(wrapWidthFullMode, wrapWidthCompactMode, fontS
     type = "label",
     wrapWidth = wrapWidthFullMode,
     fontSize = fontSize,
-    position = {-100, -100}
+    position = {-100, -100},
+    font = font or nil
   }, "totallyFakeLabelFullMode")
   pane.addWidget({
     type = "label",
     wrapWidth = wrapWidthCompactMode,
     fontSize = fontSize,
-    position = {-100, -100}
+    position = {-100, -100},
+    font = font or nil
   }, "totallyFakeLabelCompactMode")
 end
 
@@ -398,35 +432,21 @@ function findButtonByMode(mode)
 end
 
 function localeChat()
-
-  local savedText = widget.getText("tbxInput")
-  local hasFocus = widget.hasFocus("tbxInput")
-
-  self.chatMode = root.getConfiguration("sccMode") or "modern"
-  if self.chatMode ~= "compact" then self.chatMode = "modern" end
+  local hasFocus = self.customChat:hasFocusInput()
 
   local buttons = config.getParameter("gui")["rgChatMode"]["buttons"]
   for i, button in ipairs(buttons) do
-    widget.setText("rgChatMode." .. i, starcustomchat.utils.getTranslation("chat.modes." .. button.data.mode))
+    local name = starcustomchat.utils.getTranslation("chat.modes." .. button.data.mode)
+    widget.setText("rgChatMode." .. i, name)
   end
 
-  if not widget.setHint then 
-    widget.setText("lblTextboxHint", starcustomchat.utils.getTranslation("chat.textbox.hint"))
-    local hint = starcustomchat.utils.getTranslation("chat.textbox.hint")
-  
-    if not savedText or savedText == "" then
-      widget.setText("lblTextboxHint", hint)
-    end
-  else
-    widget.setText("lblTextboxHint", "")
-    widget.setHint("tbxInput", starcustomchat.utils.getTranslation("chat.textbox.hint"))
-  end
+  self.customChat:resetHint()
 
   self.runCallbackForPlugins("onLocaleChange")
 
 
   if hasFocus then
-    widget.focus("tbxInput")
+    self.customChat:focusInput()
   end
 end
 
@@ -434,6 +454,7 @@ function update(dt)
 
   ICChatTimer:update(dt)
   promises:update()
+  animatedWidgets:update(dt)
   
   if self.drawingCanvas then self.drawingCanvas:clear() end
 
@@ -445,118 +466,368 @@ function update(dt)
   processButtonEvents(dt)
   processLeftMenuButtons()
 
-  if self.toggleMoveChat then
-    local cursorPosition = vec2.sub(self.drawingCanvas:mousePosition(), widget.getSize("btnMoveChat"))
-    pane.setPosition(vec2.sub(cursorPosition, widget.getPosition("btnMoveChat")))
+  if self.toggleMoveChat and pane.setPosition then
+    local mousePosition = currentMousePosition()
+    if mousePosition then
+      local cursorPosition = vec2.sub(mousePosition, vec2.div(widget.getSize("btnMoveChat"), 2))
+      pane.setPosition(vec2.sub(cursorPosition, widget.getPosition("btnMoveChat")))
+    end
   end
+
+  processChatResize()
 
   self.runCallbackForPlugins("update", dt)
 end
 
 function cursorOverride(screenPosition)
+  if self.toggleResizeChat then
+    return
+  end
+
   processEvents(screenPosition)
   processContextMenu(screenPosition)
 
   self.runCallbackForPlugins("onCursorOverride", screenPosition)
 end
 
-function textboxCallback(a, b, c, d)
-  self.runCallbackForPlugins("onTextboxCallback", widget.getText("tbxInput"))
+function textboxCallback()
+  self.runCallbackForPlugins("onTextboxCallback", self.customChat:getText())
 end
 
 function checkCommandsPreview()
-  local function setCommandPreviewData(entries)
-    if #entries > 0 then
-      self.savedCommandSelection = math.max(self.savedCommandSelection % (#entries + 1), 1)
-      widget.setVisible("lytCommandPreview", true)
-      widget.setText("lblCommandPreview", entries[self.savedCommandSelection].name)
-      widget.setData("lblCommandPreview", entries[self.savedCommandSelection].name)
-      self.customChat:previewCommands(entries, self.savedCommandSelection)
-    else
-      widget.setVisible("lytCommandPreview", false)
-      widget.setText("lblCommandPreview", "")
-      widget.setData("lblCommandPreview", nil)
-      self.savedCommandSelection = 0
-    end
-  end
-
-  local text = widget.getText("tbxInput")
-
-  if utf8.len(text) > 2 and string.sub(text, 1, 1) == "/" then
-    local availableCommands = starcustomchat.utils.getCommands(self.availableCommands, text)
-    setCommandPreviewData(availableCommands)
-    
-  elseif utf8.len(text) >= 1 and string.sub(text, 1, 1) == "@" then
-    if not self.pingUsersAround then
-      self.pingUsersAround = {}
-      for _, pl in ipairs(starcustomchat.utils.playersInRadius(nil, true, true)) do
-        table.insert(self.pingUsersAround, {
-          command = "@" .. world.entityName(pl),
-          description = "chat.alerts.ping_user"
-        })
-      end
-    end
-
-    local playersAround = starcustomchat.utils.getCommands({playerNames = self.pingUsersAround}, text)
-    setCommandPreviewData(playersAround)
-
-  else
-    widget.setVisible("lytCommandPreview", false)
-    widget.setText("lblCommandPreview", "")
-    widget.setData("lblCommandPreview", nil)
-    self.savedCommandSelection = 0
-    self.pingUsersAround = nil
-  end
+  local text = self.customChat:getText()
+  self.commandPreview:update(text)
 end
 
 function checkTyping()
-  local text = widget.getText("tbxInput")
+  local text = self.customChat:getText()
 
   if not widget.setHint then
     widget.setVisible("lblTextboxHint", text == "")
   end
 
-  if widget.hasFocus("tbxInput") or text ~= "" and not status.getPersistentEffects("starchatdots") then
+  if (self.customChat:hasFocusInput() or text ~= "" or self.runCallbackForPlugins("showDots") ) and not next(status.getPersistentEffects("starchatdots")) ~= nil then
     status.addPersistentEffect("starchatdots", "starchatdots")
   else
     status.clearPersistentEffects("starchatdots")
     self.currentSentMessage = nil
+    self.recalledSentMessage = nil
   end
 end
 
-function getSizes(expanded, chatParameters)
-  local canvasSize = widget.getSize(self.canvasName)
-
-  local saPlayersSize = widget.getSize("lytCharactersToDM.saPlayers")
-
-  local charactersListWidth = widget.getSize("lytCharactersToDM.background")[1]
+function defaultChatSizeSettings(chatParameters)
+  local bodyWidth = chatParameters.chatBodyWidth or 270
+  local paneWidthPadding = chatParameters.paneWidthPadding or 37
+  local maxBodyHeight = chatParameters.maxChatBodyHeight or 400
 
   return {
-    canvasSize = expanded and {canvasSize[1], chatParameters.expandedBodyHeight - chatParameters.spacings.messages - 4} or {canvasSize[1], chatParameters.bodyHeight - chatParameters.spacings.messages - 4},
-    highligtCanvasSize = expanded and {canvasSize[1], chatParameters.expandedBodyHeight - chatParameters.spacings.messages - 4} or {canvasSize[1], chatParameters.bodyHeight - chatParameters.spacings.messages - 4},
-    bgStretchImageSize = expanded and {canvasSize[1], chatParameters.expandedBodyHeight - chatParameters.spacings.messages} or {canvasSize[1], chatParameters.bodyHeight - chatParameters.spacings.messages},
-    scrollAreaSize = expanded and {canvasSize[1], chatParameters.expandedBodyHeight} or {canvasSize[1], chatParameters.bodyHeight },
-    playersSaSize = expanded and {saPlayersSize[1], chatParameters.expandedBodyHeight - 15} or {saPlayersSize[1], chatParameters.bodyHeight - 15},
-    playersDMBackground = expanded and {charactersListWidth, chatParameters.expandedBodyHeight - 15} or {charactersListWidth, chatParameters.bodyHeight- 15}
+    paneWidth = bodyWidth + paneWidthPadding,
+    currentHeight = maxBodyHeight
   }
 end
 
-function setSizes(expanded, chatParameters, currentSizes)
-  local defaultSizes = getSizes(expanded, chatParameters)
-  widget.setSize(self.canvasName, currentSizes and currentSizes.canvasSize or defaultSizes.canvasSize)
-  widget.setSize("saScrollArea", currentSizes and currentSizes.canvasSize or defaultSizes.canvasSize)
-  widget.setSize(self.highlightCanvasName, currentSizes and currentSizes.highligtCanvasSize or defaultSizes.highligtCanvasSize)
-  widget.setSize("lytCharactersToDM.background", currentSizes and currentSizes.playersDMBackground or defaultSizes.playersDMBackground)
-  widget.setSize("backgroundImage", currentSizes and currentSizes.bgStretchImageSize or defaultSizes.bgStretchImageSize)
-  widget.setSize("saFakeScrollArea", currentSizes and currentSizes.scrollAreaSize or defaultSizes.scrollAreaSize)
-  widget.setSize("lytCharactersToDM.saPlayers", currentSizes and currentSizes.playersSaSize or defaultSizes.playersSaSize)
+function normalizeChatSizeSettings(chatParameters, sizeSettings)
+  local defaults = defaultChatSizeSettings(chatParameters)
+  local paneWidthPadding = chatParameters.paneWidthPadding or 37
+  local minPaneWidth = (chatParameters.minChatBodyWidth or 270) + paneWidthPadding
+  local maxPaneWidth = (chatParameters.maxChatBodyWidth or 600) + paneWidthPadding
+  local minBodyHeight = chatParameters.minChatBodyHeight or 90
+  local maxBodyHeight = chatParameters.maxChatBodyHeight or 400
 
-  if self.isOSBXSB then
-    pane.setSize(expanded and {pane.getSize()[1], chatParameters.expandedBodyHeight + 25} or {pane.getSize()[1], chatParameters.bodyHeight + 25})
-    widget.setSize("background", expanded and {self.chatWindowWidth, chatParameters.expandedBodyHeight} or {self.chatWindowWidth, chatParameters.bodyHeight})
-    widget.setSize(self.canvasName, currentSizes and vec2.add(currentSizes.canvasSize, {0,2}) or vec2.add(defaultSizes.canvasSize, {0,2}))
-    widget.setSize("saScrollArea", currentSizes and vec2.add(currentSizes.highligtCanvasSize, {0,2}) or vec2.add(defaultSizes.highligtCanvasSize, {0,2}))
-    widget.setSize(self.highlightCanvasName, currentSizes and vec2.add(currentSizes.highligtCanvasSize, {0,2}) or vec2.add(defaultSizes.highligtCanvasSize, {0,2}))
+  local normalized = {
+    paneWidth = math.floor(util.clamp(tonumber(sizeSettings.paneWidth) or defaults.paneWidth, minPaneWidth, maxPaneWidth) + 0.5),
+    currentHeight = math.floor(util.clamp(tonumber(sizeSettings.currentHeight) or defaults.currentHeight, minBodyHeight, maxBodyHeight) + 0.5)
+  }
+
+  return normalized
+end
+
+function loadChatSizeSettings(chatParameters)
+  local stored = root.getConfiguration("scc_chat_size") or {}
+  if type(stored) ~= "table" then
+    stored = {}
+  end
+
+  local defaults = defaultChatSizeSettings(chatParameters)
+  return normalizeChatSizeSettings(chatParameters, {
+    paneWidth = stored.paneWidth or stored[1] or defaults.paneWidth,
+    currentHeight = stored.currentHeight or defaults.currentHeight
+  })
+end
+
+function applyChatSizeSettings(chatParameters, sizeSettings)
+  local paneWidthPadding = chatParameters.paneWidthPadding or 37
+  local bodyWidth = math.max(1, sizeSettings.paneWidth - paneWidthPadding)
+
+  chatParameters.chatBodyWidth = bodyWidth
+  chatParameters.currentChatHeight = sizeSettings.currentHeight
+  chatParameters.wrapWidthFullMode = math.max(30, bodyWidth - (chatParameters.wrapWidthFullModePadding or 45))
+  chatParameters.wrapWidthCompactMode = math.max(30, bodyWidth - (chatParameters.wrapWidthCompactModePadding or 10))
+  chatParameters.textBoxDefaultSize = {bodyWidth, chatParameters.textBoxDefaultSize and chatParameters.textBoxDefaultSize[2] or 13}
+end
+
+function setWidgetWidth(widgetName, width)
+  local size = nil
+  local success = pcall(function()
+    size = widget.getSize(widgetName)
+  end)
+
+  if success and size then
+    widget.setSize(widgetName, {width, size[2]})
+  end
+end
+
+function setResizableWidgetWidths(chatParameters, sizes)
+  local bodyWidth = chatParameters.chatBodyWidth or widget.getSize(self.canvasName)[1]
+  local bodyLeft = widget.getPosition("imgTextbox")[1]
+  local bodyRight = bodyLeft + bodyWidth
+
+  setWidgetWidth("imgTextbox", bodyWidth)
+  setWidgetWidth("lytSubMenu", bodyWidth)
+  setWidgetWidth("lytSubMenu.background", bodyWidth)
+  setWidgetWidth("lytNotification", bodyWidth)
+  setWidgetWidth("lytNotification.background", bodyWidth)
+  setWidgetWidth("lytNotification.lblNotification", bodyWidth)
+  setWidgetWidth("lytCommandPreview", bodyWidth)
+  setWidgetWidth("lytCommandPreview.imgBackground", math.max(1, bodyWidth - 1))
+  setWidgetWidth("lytCommandPreview.imgStretchDescription", bodyWidth)
+  setWidgetWidth("background", bodyWidth)
+  setWidgetWidth("backgroundImage", bodyWidth)
+  setWidgetWidth("frameImage", bodyWidth)
+  setWidgetWidth(self.canvasName, bodyWidth)
+  setWidgetWidth(self.highlightCanvasName, bodyWidth)
+  setWidgetWidth("cnvBackgroundCanvas", bodyWidth)
+  setWidgetWidth("saScrollArea", bodyWidth)
+
+  if self.customChat and self.customChat.textBox then
+    self.customChat.textBox:setSize(widget.getSize("imgTextbox"))
+  end
+
+  -- Resize and reposition mode buttons
+  local modeButtons = config.getParameter("gui")["rgChatMode"]["buttons"]
+  
+  self.modeImageSize = self.modeImageSize or root.imageSize("/interface/scripted/starcustomchat/base/images/tabmodes/chatmode.png")
+
+  if modeButtons and #modeButtons > 0 then
+    local rgChatModePos = widget.getPosition("rgChatMode")
+    local modeFilterWidth = widget.getSize("lytModeFilter")[1]
+    local availableWidthForModes = math.max(1, bodyRight - rgChatModePos[1])
+    local buttonWidth = availableWidthForModes / #modeButtons
+    local diffDirectives = string.format("?scalenearest=%s;1", buttonWidth / self.modeImageSize[2] )
+    
+    for i, btn in ipairs(modeButtons) do
+      local newPosition = {(i - 1) * buttonWidth, 0}
+      widget.setPosition("rgChatMode." .. i, newPosition)
+      widget.setButtonImages("rgChatMode." .. i, {
+        base = "/interface/scripted/starcustomchat/base/images/tabmodes/chatmode.png" .. diffDirectives,
+        hover = "/interface/scripted/starcustomchat/base/images/tabmodes/chatmode.png?brightness=30" .. diffDirectives,
+        pressed = "/interface/scripted/starcustomchat/base/images/tabmodes/chatmodeselected.png" .. diffDirectives
+      })
+      widget.setButtonCheckedImages("rgChatMode." .. i, {
+        base = "/interface/scripted/starcustomchat/base/images/tabmodes/chatmode.png" .. diffDirectives,
+        hover = "/interface/scripted/starcustomchat/base/images/tabmodes/chatmode.png?brightness=30" .. diffDirectives,
+        pressed = "/interface/scripted/starcustomchat/base/images/tabmodes/chatmodeselected.png" .. diffDirectives
+      })
+      widget.setSize("rgChatMode." .. i, {buttonWidth, widget.getSize("rgChatMode." .. i)[2]})
+    end
+  end
+
+  widget.setPosition("lytModeFilter", {bodyRight, widget.getPosition("lytModeFilter")[2]})
+  widget.setPosition("btnMoveChat", {bodyRight, widget.getPosition("btnMoveChat")[2]})
+
+  if sizes then
+    local resizeButtonSize = widget.getSize("btnResizeChat")
+    widget.setPosition("btnResizeChat", {bodyRight, math.max(0, sizes.fullSize[2] - resizeButtonSize[2])})
+  else
+    widget.setPosition("btnResizeChat", {bodyRight, widget.getPosition("btnResizeChat")[2]})
+  end
+
+  widget.setPosition("lytSubMenu.resetEditLayout", {math.max(0, bodyWidth - 15), widget.getPosition("lytSubMenu.resetEditLayout")[2]})
+end
+
+function applyWidgetSizeSettings(chatParameters)
+  setResizableWidgetWidths(chatParameters)
+  local sizes = getSizes(chatParameters)
+  setResizableWidgetWidths(chatParameters, sizes)
+
+  if pane.setSize then
+    pane.setSize(sizes.fullSize)
+  end
+end
+
+function getSizes(chatParameters)
+  local canvasSize = {chatParameters.chatBodyWidth or widget.getSize(self.canvasName)[1], widget.getSize(self.canvasName)[2]}
+  local dmPlayersSize = widget.getSize("lytCharactersToDM.background")
+
+  local modeHeight = chatParameters.currentChatHeight or (chatParameters.maxChatBodyHeight or 400)
+
+  local submenuHeight = (widget.active("lytSubMenu") and widget.getSize("lytSubMenu")[2]) or 0
+  local textboxHeight = widget.getSize("imgTextbox")[2] 
+
+  local bodyHeight = math.max(modeHeight - submenuHeight -  textboxHeight, 1)
+
+  local buttonsSize = self.modeImageSize[2]
+  local paneWidthPadding = chatParameters.paneWidthPadding or math.max(0, pane.getSize()[1] - canvasSize[1])
+
+  return {
+    fullHeight = {canvasSize[1], modeHeight + 2},
+    canvasSize = {canvasSize[1], bodyHeight + 2},
+    dmPlayersSize = {dmPlayersSize[1], math.max(modeHeight - widget.getPosition("lytCharactersToDM")[2], 1)},
+    dmPlayersSASize = {dmPlayersSize[1] + 10, math.max(modeHeight - widget.getPosition("lytCharactersToDM")[2], 1)},
+    submenuHeight = submenuHeight,
+    textboxHeight = textboxHeight,
+    fullSize = {canvasSize[1] + paneWidthPadding, bodyHeight + submenuHeight + textboxHeight + buttonsSize + 2}
+  }
+end
+
+function setSizes(chatParameters, smooth)
+  local sizes = getSizes(chatParameters)
+  local speed = chatParameters.chatSizeChangeSpeed
+
+  if pane.setSize then
+    if smooth then
+      animatedWidgets:add(AnimatedWidget:setPaneSize(sizes.fullSize, speed))
+    else
+      pane.setSize(sizes.fullSize)
+    end
+  end
+
+  setResizableWidgetWidths(chatParameters, sizes)
+
+  widget.setPosition("lytSubMenu", vec2.add(widget.getPosition("imgTextbox"), {0, widget.getSize("imgTextbox")[2]}))
+  widget.setPosition("lytNotification", vec2.add(widget.getPosition("lytSubMenu"), {0, sizes.submenuHeight}))
+
+  local canvasTopOffset = sizes.submenuHeight
+  local canvasBasePosition = vec2.add(widget.getPosition("lytSubMenu"), {0, canvasTopOffset})
+  widget.setPosition(self.canvasName, canvasBasePosition)
+  widget.setPosition("saScrollArea", canvasBasePosition)
+  widget.setPosition(self.highlightCanvasName, canvasBasePosition)
+  widget.setPosition(self.topCanvasName, canvasBasePosition)
+  widget.setPosition("lytCommandPreview", canvasBasePosition)
+  widget.setPosition("backgroundImage", canvasBasePosition)
+  widget.setPosition("background", canvasBasePosition)
+  widget.setPosition("frameImage", canvasBasePosition)
+
+  widget.setSize(self.canvasName, sizes.canvasSize)
+  widget.setSize(self.highlightCanvasName, sizes.canvasSize)
+  widget.setSize(self.topCanvasName, sizes.canvasSize)
+  widget.setSize("cnvBackgroundCanvas", sizes.canvasSize)
+  widget.setSize("saScrollArea", sizes.canvasSize)
+  widget.setSize("lytCommandPreview", sizes.canvasSize)
+  widget.setSize("lytCommandPreview.imgBackground", {sizes.canvasSize[1], widget.getSize("lytSubMenu")[2]})
+  widget.setSize("lytSubMenu", {sizes.canvasSize[1], widget.getSize("lytSubMenu")[2]})
+  widget.setSize("lytSubMenu.background", {sizes.canvasSize[1], widget.getSize("lytSubMenu")[2]})
+
+  if smooth then
+    animatedWidgets:add(AnimatedWidget:bind("background"):setSize(sizes.canvasSize, speed))
+    animatedWidgets:add(AnimatedWidget:bind("backgroundImage"):setSize(sizes.canvasSize, speed))
+    animatedWidgets:add(AnimatedWidget:bind("frameImage"):setSize(sizes.canvasSize, speed), function()
+        widget.setSize(self.canvasName, sizes.canvasSize)
+        widget.setSize(self.highlightCanvasName, sizes.canvasSize)
+        widget.setSize(self.topCanvasName, sizes.canvasSize)
+        widget.setSize("cnvBackgroundCanvas", sizes.canvasSize)
+    end)
+    
+    animatedWidgets:add(AnimatedWidget:bind("lytCharactersToDM"):setSize(sizes.dmPlayersSASize, speed))
+    animatedWidgets:add(AnimatedWidget:bind("lytCharactersToDM.saPlayers"):setSize(sizes.dmPlayersSASize, speed))
+    animatedWidgets:add(AnimatedWidget:bind("lytCharactersToDM.background"):setSize(sizes.dmPlayersSize, speed))
+  else
+    widget.setSize("background", sizes.canvasSize)
+    widget.setSize("backgroundImage", sizes.canvasSize)
+    widget.setSize("frameImage", sizes.canvasSize)
+    widget.setSize("lytCharactersToDM", sizes.dmPlayersSASize)
+    widget.setSize("lytCharactersToDM.background", sizes.dmPlayersSize)
+    widget.setSize("lytCharactersToDM.saPlayers", sizes.dmPlayersSASize)
+  end
+
+  if self.customChat then
+    self.customChat:drawBackground()
+    self.customChat:updateTextboxMaxHeight()
+  end
+end
+
+function modeHeightFromPaneSize(paneSize, chatParameters)
+  return paneSize[2] - self.modeImageSize[2] - 2
+end
+
+function chatSizeSettingsFromPaneSize(paneSize)
+  local settings = copy(self.chatSizeSettings or defaultChatSizeSettings(self.customChat.config))
+  settings.paneWidth = paneSize[1]
+  settings.currentHeight = modeHeightFromPaneSize(paneSize, self.customChat.config)
+
+  return normalizeChatSizeSettings(self.customChat.config, settings)
+end
+
+function saveChatSizeSettings()
+  if self.chatSizeSettings and pane.setSize then
+    root.setConfiguration("scc_chat_size", self.chatSizeSettings)
+  end
+end
+
+function resizeChatToPaneSize(paneSize)
+  if not pane.setSize or not paneSize then
+    return
+  end
+
+  local oldWidth = self.customChat.config.chatBodyWidth
+  self.chatSizeSettings = chatSizeSettingsFromPaneSize(paneSize)
+  applyChatSizeSettings(self.customChat.config, self.chatSizeSettings)
+  setSizes(self.customChat.config)
+
+  if oldWidth ~= self.customChat.config.chatBodyWidth then
+    createTotallyFakeWidgets(
+      self.customChat.config.wrapWidthFullMode,
+      self.customChat.config.wrapWidthCompactMode,
+      self.customChat.config.fontSize,
+      self.customChat:getFont("chattext")
+    )
+    self.customChat.recalculateHeight = true
+  end
+
+  self.customChat:processQueue()
+end
+
+function bindChatInterfaceCanvas()
+  if not self.drawingCanvas and interface.bindCanvas then
+    pcall(function()
+      self.drawingCanvas = interface.bindCanvas("chatInterfaceCanvas")
+    end)
+  end
+
+  return self.drawingCanvas
+end
+
+function currentMousePosition()
+  if not self.drawingCanvas then
+    bindChatInterfaceCanvas()
+  end
+
+  if self.drawingCanvas and self.drawingCanvas.mousePosition then
+    return self.drawingCanvas:mousePosition()
+  end
+
+  if input.mousePosition then
+    return input.mousePosition()
+  end
+end
+
+function processChatResize()
+  if not self.toggleResizeChat or not pane.setSize or not pane.getPosition then
+    return
+  end
+
+  local mousePosition = currentMousePosition()
+  if not mousePosition then
+    return
+  end
+
+  local resizeCursorOffset = self.resizeCursorOffset or {0, 0}
+  local desiredPaneSize = vec2.add(vec2.sub(mousePosition, pane.getPosition()), resizeCursorOffset)
+  desiredPaneSize = {math.floor(desiredPaneSize[1] + 0.5), math.floor(desiredPaneSize[2] + 0.5)}
+
+  if not self.lastRequestedChatSize or desiredPaneSize[1] ~= self.lastRequestedChatSize[1] or desiredPaneSize[2] ~= self.lastRequestedChatSize[2] then
+    self.lastRequestedChatSize = desiredPaneSize
+    resizeChatToPaneSize(desiredPaneSize)
   end
 end
 
@@ -564,82 +835,68 @@ function canvasClickEvent(position, button, isButtonDown)
   if self.runCallbackForPlugins("onCanvasClick", position, button, isButtonDown) then
     return
   end
+
+  if self.toggleMoveChat or self.toggleResizeChat then
+    widget.blur(self.canvasName)
+    widget.blur(self.highlightCanvasName)
+    widget.blur(self.topCanvasName)
+    return
+  end
   
-  if button == 0 and isButtonDown then
-    self.customChat.expanded = not self.customChat.expanded
-    root.setConfiguration("icc_is_expanded", self.customChat.expanded)
-
-    if self.isOSBXSB then
-      setSizes(self.customChat.expanded, self.customChat.config, config.getParameter("currentSizes"))
-      self.customChat:processQueue()
-
-      if widget.getText("tbxInput") ~= "" then
-        widget.focus("tbxInput")
-      end
-    else
-      if not self.reopening then
-        
-        local chatParameters = getSizes(self.customChat.expanded, self.customChat.config)
-        saveEverythingDude()
-        pane.dismiss()
-
-        local chatConfig = buildChatInterface()
-        chatConfig["gui"]["background"]["fileBody"] = string.format("/interface/scripted/starcustomchat/base/%s.png", self.customChat.expanded and "body" or "shortbody")
-        chatConfig.expanded = self.customChat.expanded
-        chatConfig.currentSizes = chatParameters
-        chatConfig.lastInputMessage = widget.getText("tbxInput")
-        chatConfig.portraits = self.customChat.savedPortraits
-        chatConfig.connectionToUuid =  self.customChat.connectionToUuid
-        chatConfig.currentMessageMode =  widget.getSelectedOption("rgChatMode")
-        chatConfig.DMingPlayerID = self.DMTab:selectedPlayer() and self.DMTab:selectedPlayer().id or nil
-        chatConfig.chatLineOffset = self.customChat.lineOffset
-        chatConfig.reopened = true
-        chatConfig.selectedModes = {}
-        for _, mode in ipairs(chatConfig["chatModes"]) do 
-          if widget.active("btnCk" .. mode) then
-            chatConfig.selectedModes["btnCk" .. mode] = widget.getChecked("btnCk" .. mode)
-          end
-        end
-
-        chatConfig = self.runCallbackForPlugins("onBackgroundChange", chatConfig)
-
-        player.interact("ScriptPane", chatConfig)
-        self.reopening = true
-      end
-    end
+  if button == 0 and isButtonDown then    
+    local minBodyHeight = self.customChat.config.minChatBodyHeight
+    local maxBodyHeight = self.customChat.config.maxChatBodyHeight
+    local heightLeeway = 15
+    
+    -- Get current height
+    local currentHeight = self.chatSizeSettings.currentHeight
+    
+    -- If at max height (with leeway), set to min, otherwise set to max
+    local newHeight = (currentHeight >= maxBodyHeight - heightLeeway) and minBodyHeight or maxBodyHeight
+    
+    self.chatSizeSettings.currentHeight = newHeight
+    
+    self.lastRequestedChatSize = {self.chatSizeSettings.paneWidth, self.chatSizeSettings.currentHeight}
+    resizeChatToPaneSize(self.lastRequestedChatSize)
+    self.customChat:processQueue()
   end
 
   -- Defocus from the canvases or we can never leave lol :D
   widget.blur(self.canvasName)
   widget.blur(self.highlightCanvasName)
+  widget.blur(self.topCanvasName)
 end
 
 function processEvents(screenPosition)
   for _, event in ipairs(input.events()) do
-    if event.type == "MouseWheel" and widget.inMember("saScrollArea", screenPosition) then
+    if widget.inMember("saScrollArea", screenPosition) then
+      if event.type == "MouseWheel"  then
 
-      if not self.runCallbackForPlugins("onChatScroll", screenPosition) then
-        if input.key("LCtrl") then
-          local newChatSize = math.min(math.max(self.customChat.config.fontSize + event.data.mouseWheel, 6), 10)
-          if newChatSize ~= self.customChat.config.fontSize then
-            self.customChat.recalculateHeight = true
+        if not self.runCallbackForPlugins("onChatScroll", screenPosition) then
+          if input.key("LCtrl") then
+            local newChatSize = math.min(math.max(self.customChat.config.fontSize + event.data.mouseWheel, 6), 10)
+            if newChatSize ~= self.customChat.config.fontSize then
+              self.customChat.recalculateHeight = true
+            end
+            self.customChat.config.fontSize = newChatSize
+
+            root.setConfiguration("icc_font_size", self.customChat.config.fontSize)
+            createTotallyFakeWidgets(self.customChat.config.wrapWidthFullMode, self.customChat.config.wrapWidthCompactMode, self.customChat.config.fontSize, self.customChat:getFont("chattext"))
+            self.customChat:processQueue()
+          else
+            local lineHeight = self.customChat.config.fontSize + self.customChat.config.spacings.lines
+            self.customChat:offsetCanvas(event.data.mouseWheel * -lineHeight * (input.key("LShift") and 2 or 1))
           end
-          self.customChat.config.fontSize = newChatSize
-
-          root.setConfiguration("icc_font_size", self.customChat.config.fontSize)
-          createTotallyFakeWidgets(self.customChat.config.wrapWidthFullMode, self.customChat.config.wrapWidthCompactMode, self.customChat.config.fontSize)
-          self.customChat:processQueue()
-        else
-          self.customChat:offsetCanvas(event.data.mouseWheel * -1 * (input.key("LShift") and 2 or 1))
         end
-      end
-    elseif event.type == "KeyDown" then
-      if event.data.key == "PageUp" then
-        self.customChat:offsetCanvas(self.customChat.expanded and - self.customChat.config.pageSkipExpanded or - self.customChat.config.pageSkip)
-      elseif event.data.key == "PageDown" then
-        self.customChat:offsetCanvas(self.customChat.expanded and self.customChat.config.pageSkipExpanded or self.customChat.config.pageSkip)
-      elseif event.data.key == "End" then
-        self.customChat:resetCanvasOffset()
+      elseif event.type == "KeyDown" then
+        self.customChat:ignoreInputFrame()
+        if event.data.key == "PageUp" then
+          self.customChat:offsetCanvas(-self.chatSizeSettings.currentHeight)
+        elseif event.data.key == "PageDown" then
+          self.customChat:offsetCanvas(self.chatSizeSettings.currentHeight)
+        elseif event.data.key == "End" then
+          self.customChat:resetCanvasOffset()
+        end
       end
     end
   end
@@ -647,44 +904,35 @@ end
 
 function processButtonEvents(dt)
 
-  -- StarExtensions only
-  if not self.isOSBXSB then
-    if input.keyDown("Return") or input.keyDown("/") and not widget.hasFocus("tbxInput") then
-      if input.keyDown("/") then
-        widget.setText("tbxInput", "/")
-      end
-      widget.focus("tbxInput")
-      chat.setInput("")
-    end
-  end
-
-  if widget.hasFocus("tbxInput") then
+  if self.customChat:hasFocusInput() then
     for _, event in ipairs(input.events()) do
       if event.type == "KeyDown" then
         local lShift = event.data.mods and (event.data.mods.LShift or index(event.data.mods, "LShift") ~= 0)
         local rShift = event.data.mods and (event.data.mods.RShift or index(event.data.mods, "RShift") ~= 0)
         local lCtrl = event.data.mods and (event.data.mods.LCtrl or index(event.data.mods, "LCtrl") ~= 0)
         local rCtrl = event.data.mods and (event.data.mods.RCtrl or index(event.data.mods, "RCtrl") ~= 0)
+        local lAlt = event.data.mods and (event.data.mods.LAlt or index(event.data.mods, "LAlt") ~= 0)
+        local rAlt = event.data.mods and (event.data.mods.RAlt or index(event.data.mods, "RAlt") ~= 0)
         local shiftPressed = lShift or rShift
         local ctrlPressed = lCtrl or rCtrl
+        local altPressed = lAlt or rAlt
 
         if event.data.key == "Tab" then
-          self.savedCommandSelection = self.savedCommandSelection + 1
-        elseif event.data.key == "Up" and shiftPressed then
+          self.commandPreview:advanceSelection()
+        elseif event.data.key == "Up" and altPressed then
           if #self.sentMessages > 0 then
             self.currentSentMessage = self.currentSentMessage and math.max(self.currentSentMessage - 1, 1) or #self.sentMessages
-            widget.setText("tbxInput", self.sentMessages[self.currentSentMessage])
+            self.recalledSentMessage = self.sentMessages[self.currentSentMessage]
+            self.customChat:setText(self.recalledSentMessage)
           end
-        elseif event.data.key == "Down" and shiftPressed then
+          self.customChat:ignoreInputFrame()
+        elseif event.data.key == "Down" and altPressed then
           if #self.sentMessages > 0 then
             self.currentSentMessage = self.currentSentMessage and math.min(self.currentSentMessage + 1, #self.sentMessages) or #self.sentMessages
-            widget.setText("tbxInput", self.sentMessages[self.currentSentMessage])
+            self.recalledSentMessage = self.sentMessages[self.currentSentMessage]
+            self.customChat:setText(self.recalledSentMessage)
           end
-        elseif event.data.key == "V" and ctrlPressed then
-          local textInClipboard = clipboard.getText()
-          if textInClipboard and string.find(textInClipboard, '\n') then
-            widget.setText("tbxInput", widget.getText("tbxInput") .. string.gsub(textInClipboard, "[\n\r]", " "))
-          end
+          self.customChat:ignoreInputFrame()
         end
       end
     end
@@ -694,6 +942,8 @@ function processButtonEvents(dt)
   if input.bindDown("starcustomchat", "repeatcommand") and self.lastCommand then
     self.customChat:processCommand(self.lastCommand)
   end
+
+  self.runCallbackForPlugins("processEvents", input.events())
 end
 
 function processLeftMenuButtons()
@@ -719,54 +969,62 @@ function scrollLeftMenuDown()
   end
 end
 
-function escapeTextbox(widgetName)
+function escapeTextbox()
 
   if not self.runCallbackForPlugins("onTextboxEscape") then
-    blurTextbox(widgetName)
+    self.recalledSentMessage = nil
+    self.customChat:setText("")
+    self.customChat:blurInput()
   end
-end
-
-function blurTextbox(widgetName)
-  widget.setText(widgetName, "")
-  widget.blur(widgetName)
 end
 
 function sendMessageToBeSent(text, mode)
   mode = mode or widget.getSelectedData("rgChatMode").mode
+  -- Add trim
+  text = starcustomchat.utils.trim(text)
 
   local message = {
     text = text,
     mode = mode
   }
 
+  local pingEntityId, pingName = self.commandPreview:getPingTarget(text)
+  if pingEntityId then
+    message.pingTarget = {
+      entityId = pingEntityId,
+      name = pingName
+    }
+  end
+
   if self.runCallbackForPlugins("preventTextboxCallback", message) then
     return
   end
 
+  local selectedInsertion = self.commandPreview:getSelectedInsertion(text)
+
   if string.sub(text, 1, 1) == "/" and not string.find(text, "^/%w+%.png") then
     if string.len(text) == 1 then
-      blurTextbox("tbxInput")
+      self.recalledSentMessage = nil
+      self.customChat:setText("")
+      self.customChat:blurInput()
       return
     end
 
-    if string.sub(text, 1, 2) == "//" and not self.isOSBXSB then
-      starcustomchat.utils.alert("chat.alerts.cannot_start_two_slashes")
-      return
-    end
-
-    if widget.getData("lblCommandPreview") and widget.getData("lblCommandPreview") ~= "" and widget.getData("lblCommandPreview") ~= text then
-      widget.setText("tbxInput", widget.getData("lblCommandPreview") .. " ")
-      self.savedCommandSelection = 0
+    if selectedInsertion then
+      self.recalledSentMessage = nil
+      self.customChat:setText(selectedInsertion .. " ")
+      self.commandPreview:reset()
       return
     else
       self.customChat:processCommand(text)
       self.lastCommand = text
       starcustomchat.utils.saveMessage(text)
     end
-  elseif string.sub(text, 1, 1) == "@" and widget.getData("lblCommandPreview") and widget.getData("lblCommandPreview") ~= "" and widget.getData("lblCommandPreview") ~= text then
-    widget.setText("tbxInput", widget.getData("lblCommandPreview") .. " ")
-    self.savedCommandSelection = 0
-    return
+  elseif string.sub(text, 1, 1) == "@" and selectedInsertion then
+      self.recalledSentMessage = nil
+      self.customChat:setText(selectedInsertion .. " ")
+      self.commandPreview:reset()
+      return
   
   elseif not self.runCallbackForPlugins("onTextboxEnter", message) then 
     if message.mode == "Whisper" then
@@ -785,8 +1043,16 @@ function sendMessageToBeSent(text, mode)
           
           promises:add(world.sendEntityMessage(targetId, "scc_add_message", message), function() 
             if targetId ~= player.id() then
-              message.displayName = "-> " .. targetName
-              world.sendEntityMessage(player.id(), "scc_add_message", message)
+              local oldUUID = self.customChat:calculateUUID(message)
+              local msgInd = self.customChat:findMessageByUUID(oldUUID)
+              if msgInd and self.customChat.messages[msgInd].mode == "Whisper" then
+                local oldDisplayName = self.customChat.messages[msgInd].displayName or self.customChat.messages[msgInd].nickname
+                self.customChat.messages[msgInd].displayName = oldDisplayName .. ", " .. targetName
+                self.customChat:processQueue()
+              else
+                message.displayName = "-> " .. targetName
+                world.sendEntityMessage(player.id(), "scc_add_message", message)
+              end
             end
           end, function() 
             local whisper = string.find(targetName, "%s") and "/w \"" .. targetName .. "\" " .. message.text 
@@ -825,16 +1091,18 @@ function sendMessageToBeSent(text, mode)
       sendMessage(message)
     end
   end
-  blurTextbox("tbxInput")
+  self.recalledSentMessage = nil
+  self.customChat:setText("")
+  self.customChat:blurInput()
   self.runCallbackForPlugins("afterTextboxPressed", message)
 end
 
-function textboxEnterKey(widgetName)
-
-  local text = widget.getText(widgetName)
+function textboxEnterKey()
+  local text = self.customChat:getText()
 
   if text == "" then
-    blurTextbox(widgetName)
+    self.customChat:setText("")
+    self.customChat:blurInput()
     return
   end
 
@@ -866,6 +1134,7 @@ function toBottom()
 end
 
 function openSettings()
+  Configuration:save()
   local chatConfigInterface = self.settingsInterface
   chatConfigInterface.enabledPlugins = config.getParameter("enabledPlugins", {})
   chatConfigInterface.chatConfig = self.customChat.config
@@ -875,23 +1144,7 @@ function openSettings()
   player.interact("ScriptPane", chatConfigInterface)
 end
 
--- Utility function: return the index of a value in the given array
-function index(tab, value)
-  for k, v in ipairs(tab) do
-    if v == value then return k end
-  end
-  return 0
-end
-
 function createTooltip(screenPosition)
-  if self.tooltipFields then
-    for widgetName, tooltip in pairs(self.tooltipFields) do
-      if widget.inMember(widgetName, screenPosition) and widget.active(widgetName) then
-        return tooltip
-      end
-    end
-  end
-
   if widget.getChildAt(screenPosition) then
     local w = widget.getChildAt(screenPosition)
 
@@ -910,8 +1163,18 @@ function createTooltip(screenPosition)
   return self.runCallbackForPlugins("onCreateTooltip", screenPosition)
 end
 
+-- Custom callbacks, in case we need several under one button (i.e. textbox)
+
 function customButtonCallback(buttonName, data)
   self.runCallbackForPlugins("onCustomButtonClick", buttonName, data)
+end
+
+function customButtonCallback2(buttonName, data)
+  self.runCallbackForPlugins("onCustomButtonClick2", buttonName, data)
+end
+
+function customButtonCallback3(buttonName, data)
+  self.runCallbackForPlugins("onCustomButtonClick3", buttonName, data)
 end
 
 function closeSubMenu()
@@ -920,18 +1183,39 @@ function closeSubMenu()
   self.customChat:processQueue()
 end
 
-function openBiggerChat()
-  widget.focus("tbxInput")
-  local biggerChat = root.assetJson("/interface/BiggerChat/biggerchatv2.json")
-  biggerChat.initialText = widget.getText("tbxInput")
-  biggerChat.fontColor = self.customChat:getColor("chattext")
-  player.interact("ScriptPane", biggerChat)
-end
-
 function toggleChatMovement()
   self.toggleMoveChat = widget.getChecked("btnMoveChat")
+  widget.setVisible("saScrollArea", not self.toggleMoveChat)
+
+  if self.toggleMoveChat then
+    self.toggleResizeChat = false
+    widget.setChecked("btnResizeChat", false)
+  end
 end
 
+function toggleChatResize()
+  self.toggleResizeChat = widget.getChecked("btnResizeChat")
+  widget.setVisible("saScrollArea", not self.toggleResizeChat)
+
+  if self.toggleResizeChat then
+    self.toggleMoveChat = false
+    widget.setChecked("btnMoveChat", false)
+    self.selectedMessage = nil
+    widget.setVisible("lytContext", false)
+
+    local mousePosition = currentMousePosition()
+    if mousePosition and pane.getPosition and pane.getSize then
+      self.resizeCursorOffset = vec2.sub(pane.getSize(), vec2.sub(mousePosition, pane.getPosition()))
+    else
+      self.resizeCursorOffset = {0, 0}
+    end
+  else
+    self.resizeCursorOffset = nil
+    self.lastRequestedChatSize = nil
+    saveChatSizeSettings()
+    self.customChat:processQueue()
+  end
+end
 
 function saveEverythingDude()
   -- Save messages and last command
@@ -943,28 +1227,24 @@ function saveEverythingDude()
   root.setConfiguration("icc_last_command", self.lastCommand)
   root.setConfiguration("icc_my_messages", util.toList(self.sentMessages))
   root.setConfiguration("scc_chat_position", pane.getPosition and pane.getPosition() or nil)
+  saveChatSizeSettings()
 end
 
 function closeChat()
-  if not self.isOSBXSB then
-    pane.dismiss()
-    world.sendEntityMessage(player.id(), "scc_chat_hidden", widget.getSelectedOption("rgChatMode"))
-  else
-    pane.hide()
-  end
+  pane.hide()
 end
 
 -- OpenStarbound chat
 function startChat()
   pane.show()
-  widget.focus("tbxInput")
+  self.customChat:focusInput()
   chat.setInput("")
 end
 
 function startCommand()
   pane.show()
-  widget.setText("tbxInput", "/")
-  widget.focus("tbxInput")
+  self.customChat:setText("/")
+  self.customChat:focusInput()
   chat.setInput("")
 end
 
@@ -987,17 +1267,19 @@ function addMessages(messages, showPane)
 end
 
 function uninit()
-  local text = widget.getText("tbxInput")
+  local text = self.customChat:getText()
   if not self.reopening and text and text ~= "" then
     clipboard.setText(text)
   end
 
   saveEverythingDude()
-
-  if handlerCutter then
-    handlerCutter()
-  end
+  widget.setSize("imgTextbox", self.customChat.config.textBoxDefaultSize)
   
   status.clearPersistentEffects("starchatdots")
   self.runCallbackForPlugins("uninit")
+  Configuration:save()
 end
+
+
+-- Required to be at the very bottom
+require("/interface/StarboundTextboxInterface/textarea/scripts/textbox.lua")

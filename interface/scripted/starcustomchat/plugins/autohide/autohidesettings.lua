@@ -7,7 +7,6 @@ autohide = SettingsPluginClass:new(
 
 -- Settings
 function autohide:init()
-  self:_loadConfig()
 
   self.autohideTimer = root.getConfiguration("scc_autohide_timer") or 0
   self.widget.setText("lblAutohideTimer", self.autohideTimer)
@@ -17,14 +16,6 @@ function autohide:init()
   self.widget.setData("autohideTimerSpinner.down", self.widget.getData("autohideTimerSpinner"))
   self.widget.setChecked("chkIgnoreServerMessages", root.getConfiguration("scc_autohide_ignore_server_messages") or false)
   self.widget.setChecked("chkIgnoreInspectMessages", root.getConfiguration("scc_autohide_ignore_inspect_messages") or false)
-  
-  self.isOpenSB = root.assetOrigin and root.assetOrigin("/opensb/coconut.png")
-  self.isOSBXSB = self.isOpenSB or xsb
-  
-  if not self.isOSBXSB then
-    self.widget.setVisible("chkIgnoreInspectMessages", false)
-    self.widget.setVisible("lblIgnoreInspectMessages", false)
-  end
 end
 
 autohide.autohideTimerSpinner = {}

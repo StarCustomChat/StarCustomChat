@@ -7,14 +7,16 @@
   "chat.modes.Whisper": "Szept",
   "chat.modes.RadioMessage": "WiadomośćRadio",
   "chat.modes.CommandResult": "RezultatKomendy",
+  "chat.message.edited": "edytowano",
 
   "chat.textbox.hint": "Pisz tutaj",
+  "chat.textbox.hint.filter": "Filtrowanie wiadomości (\"%s\")",
 
   "chat.buttons.bottom": "Na dół",
   "chat.buttons.settings": "Ustawienia",
   "chat.buttons.hide": "Ukryj czat",
-  "chat.buttons.bigger_chat": "Większy czat",
   "chat.buttons.move_chat": "Przesuń czat",
+  "chat.buttons.resize_chat": "Zmień rozmiar czatu",
 
   "chat.alerts.dm_not_specified": "Wybierz odbiorcę",
   "chat.alerts.dm_not_found": "Gracz musi być na tej samej planecie",
@@ -47,8 +49,11 @@
   "settings.back": "Wstecz",
   "settings.add": "Dodaj",
   "settings.remove": "Usuń",
+  "settings.search": "Wyszukaj...",
 
 
+  "chat.commands.unknown_argument": "Nieznany argument: %s",
+  "chat.commands.unknown_argument_expected": "Nieznany argument: %s, dopuszczalne wartości to %s",
 
 
   "commands.general.admin": "Włącza lub wyłącza tryb administratora, który pokazuje wszystkie przepisy tworzenia, daje graczowi nieśmiertelność i nieskończoną energię, oraz pozwala na używanie komend administratora.",
@@ -119,19 +124,6 @@
   "commands.debug.togglelayer": "Włącza lub wyłącza warstwę.",
   "commands.debug.upgradeship": "Ulepsza twój statek.",
 
-  "commands.starextentions.binds": "Pokazuje wszystkie opcje klawiszowe.",
-  "commands.starextentions.breathing": "Włącza lub wyłącza efekt oddychania.",
-  "commands.starextentions.guide": "Pokazuje poradnik.",
-  "commands.starextentions.voice": "Włącza lub wyłącza czat głosowy.",
-  "commands.starextentions.swap": "Zmień aktywną postać.",
-  "commands.starextentions.editor": "Otwiera edytor.",
-  "commands.starextentions.identity": "Zarządza ustawieniami tożsamości.",
-  "commands.starextentions.identity.set": "Ustawia atrybuty tożsamości.",
-  "commands.starextentions.identity.get": "Pokazuje atrybuty tożsamości.",
-  "commands.starextentions.speech": "Włącza lub wyłącza mowę.",
-  "commands.starextentions.nightvision": "Włącza lub wyłącza widzenie w ciemności.",
-  "commands.starextentions.render": "Renderuje różne części postaci i kopiuje je do schowka.",
-
   "commands.openstarbound.swap": "Zmień aktywną postać.",
   "commands.openstarbound.identity": "Zarządza ustawieniami tożsamości.",
   "commands.openstarbound.identity.set": "Ustawia atrybuty tożsamości.",
@@ -139,6 +131,7 @@
   "commands.openstarbound.render": "Renderuje różne części postaci i kopiuje je do folderu 'storage'.",
 
   "commands.starcustomchat.clearchat": "Czyści historię czatu.",
+  "commands.starcustomchat.filter": "Filtruj wiadomości według podciągu. Wyślij puste pole, aby wyłączyć filtrowanie.",
 
   "commands.custom.hotreload": "Przeładowywuje konfigurację."
 }

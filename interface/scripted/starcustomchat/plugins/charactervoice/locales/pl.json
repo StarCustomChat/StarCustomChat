@@ -3,6 +3,7 @@
     "settings.plugins.charactervoice.enable": "Włączony",
     "settings.plugins.charactervoice.enablewhisper": "W szepcie",
     "settings.plugins.charactervoice.pitch": "Tonacja",
+    "settings.plugins.charactervoice.volume": "Głośność",
     "settings.plugins.charactervoice.test": "Test",
     "settings.plugins.charactervoice.description": "Po wysłaniu wiadomości odtwarza wybrany dźwięk",
     "settings.plugins.charactervoice.wisperDescription": "Po wysłaniu szeptu odtwarza wybrany dźwięk",

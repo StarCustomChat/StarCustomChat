@@ -51,30 +51,6 @@
         }
       },
 
-      "lblcharactervoiceEnabledWhisper": {
-        "type": "label",
-        "position": [120, 100],
-        "hAnchor": "right",
-        "color": "lightgray",
-        "translationKey": "settings.plugins.charactervoice.enablewhisper"
-      },
-      
-
-      "chkEnabledWhisper": {
-        "type": "button",
-        "position": [130, 100],
-        "checkable": true,
-        "checked": false,
-        "base": "/interface/crafting/checkboxnocheck.png",
-        "hover": "/interface/crafting/checkboxnocheck.png",
-        "baseImageChecked": "/interface/crafting/checkboxcheck.png",
-        "hoverImageChecked": "/interface/crafting/checkboxcheck.png",
-        "callback": "enableWhisperSounds",
-        "data": {
-          "displayText": "settings.plugins.charactervoice.wisperDescription"
-        }
-      },
-
       "lblcharactervoiceEnabled": {
         "type": "label",
         "position": [120, 120],
@@ -99,9 +75,33 @@
         }
       },
 
+      "lblcharactervoiceEnabledWhisper": {
+        "type": "label",
+        "position": [120, 110],
+        "hAnchor": "right",
+        "color": "lightgray",
+        "translationKey": "settings.plugins.charactervoice.enablewhisper"
+      },
+      
+
+      "chkEnabledWhisper": {
+        "type": "button",
+        "position": [130, 110],
+        "checkable": true,
+        "checked": false,
+        "base": "/interface/crafting/checkboxnocheck.png",
+        "hover": "/interface/crafting/checkboxnocheck.png",
+        "baseImageChecked": "/interface/crafting/checkboxcheck.png",
+        "hoverImageChecked": "/interface/crafting/checkboxcheck.png",
+        "callback": "enableWhisperSounds",
+        "data": {
+          "displayText": "settings.plugins.charactervoice.wisperDescription"
+        }
+      },
+
       "lblSoundPitch": {
         "type": "label",
-        "position": [120, 85],
+        "position": [120, 95],
         "hAnchor": "right",
         "color": "lightgray",
         "translationKey": "settings.plugins.charactervoice.pitch"
@@ -110,29 +110,102 @@
       "sldSoundPitch" : {
         "type": "slider",
         "gridImage" : "/interface/optionsmenu/smallselection.png",
-        "position": [130, 85],
+        "position": [130, 95],
         "callback": "setTalkingPitch"
+      },
+
+      "lblVolumePitch": {
+        "type": "label",
+        "position": [120, 80],
+        "hAnchor": "right",
+        "color": "lightgray",
+        "translationKey": "settings.plugins.charactervoice.volume"
+      },
+
+      "sldVolumePitch" : {
+        "type": "slider",
+        "gridImage" : "/interface/optionsmenu/smallselection.png",
+        "position": [130, 80],
+        "callback": "setTalkingVolume"
       },
 
       "btnPlay" : {
         "type": "button",
-        "base" : "/interface/scripted/starcustomchatsettings/bt.png",
-        "hover" : "/interface/scripted/starcustomchatsettings/bt.png?brightness=90",
+        "base" : "/interface/scripted/starcustomchatsettings/images/buttons/bt.png",
+        "hover" : "/interface/scripted/starcustomchatsettings/images/buttons/bt.png?brightness=90",
         "callback": "playSound",
         "position": [180, 120],
         "translationKey": "settings.plugins.charactervoice.test"
       },
 
-      "tbxCustomSound": {
-        "type": "textbox",
-        "position": [65, 60],
+      "btnCustomSound1": {
+        "type": "button",
+        "position": [90, 58],
+        "caption": "...",
         "visible": false,
-        "hintTranslationKey": "settings.plugins.charactervoice.customSoundHint",
-        "callback": "null",
-        "enterKey": "saveCustomSound",
-        "color": "lightgray"
+        "callback": "toggleCombobox",
+        "base": "/interface/scripted/starcustomchatsettings/images/common/buttonlarge.png:base",
+        "hover": "/interface/scripted/starcustomchatsettings/images/common/buttonlarge.png:hover"
+      },
+
+      "btnCustomSound2": {
+        "type": "button",
+        "position": [90, 46],
+        "caption": "...",
+        "visible": false,
+        "callback": "toggleCombobox",
+        "base": "/interface/scripted/starcustomchatsettings/images/common/buttonlarge.png:base",
+        "hover": "/interface/scripted/starcustomchatsettings/images/common/buttonlarge.png:hover"
+      },
+
+      "btnCustomSound3": {
+        "type": "button",
+        "position": [90, 34],
+        "caption": "...",
+        "visible": false,
+        "callback": "toggleCombobox",
+        "base": "/interface/scripted/starcustomchatsettings/images/common/buttonlarge.png:base",
+        "hover": "/interface/scripted/starcustomchatsettings/images/common/buttonlarge.png:hover"
+      },
+
+      "btnRemove1": {
+        "type": "button",
+        "position": [200, 62],
+        "base": "/interface/scripted/starcustomchatsettings/images/common/remove.png:base",
+        "hover": "/interface/scripted/starcustomchatsettings/images/common/remove.png:hover",
+        "callback": "removeSound",
+        "visible": false,
+        "data": {
+          "displayText": "settings.remove"
+        }
+      },
+      "btnRemove2": {
+        "type": "button",
+        "position": [200, 50],
+        "base": "/interface/scripted/starcustomchatsettings/images/common/remove.png:base",
+        "hover": "/interface/scripted/starcustomchatsettings/images/common/remove.png:hover",
+        "callback": "removeSound",
+        "visible": false,
+        "data": {
+          "displayText": "settings.remove"
+        }
+      },
+      "btnRemove3": {
+        "type": "button",
+        "position": [200, 38],
+        "base": "/interface/scripted/starcustomchatsettings/images/common/remove.png:base",
+        "hover": "/interface/scripted/starcustomchatsettings/images/common/remove.png:hover",
+        "callback": "removeSound",
+        "visible": false,
+        "data": {
+          "displayText": "settings.remove"
+        }
       }
     }
+  },
+
+  "parameters": {
+    "cutoffTime": 2
   },
 
   "script": "/interface/scripted/starcustomchat/plugins/charactervoice/charactervoice.lua",

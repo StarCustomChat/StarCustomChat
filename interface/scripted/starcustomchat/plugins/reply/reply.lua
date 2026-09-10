@@ -13,7 +13,7 @@ function reply:init(chat)
 
   if self.replyingToMessage then
     local targetName = starcustomchat.utils.getTranslation("chat.reply.recipient", self.replyingToMessage.displayName or self.replyingToMessage.nickname)
-    self.customChat:openSubMenu("reply", targetName, self:cropMessage(targetName, self.replyingToMessage.text))
+    self.customChat:openSubMenu("reply", targetName, self:cropMessage(targetName, string.gsub(self.replyingToMessage.text, "\n", "    ")))
   end
   self.messagesToReply = {}
 
@@ -60,9 +60,55 @@ function reply:contextMenuButtonClick(buttonName, selectedMessage)
   if selectedMessage and selectedMessage.uuid and buttonName == "reply" then
     self.replyingToMessage = selectedMessage
     local targetName = starcustomchat.utils.getTranslation("chat.reply.recipient", selectedMessage.displayName or selectedMessage.nickname)
-    self.customChat:openSubMenu("reply", targetName, self:cropMessage(targetName, selectedMessage.text))
-    widget.focus("tbxInput")
+    self.customChat:openSubMenu("reply", targetName, self:cropMessage(targetName, string.gsub(selectedMessage.text, "\n", "    ")))
+    self.customChat:focusInput()
   end
+end
+
+function reply:onMeasureMessage(message, drawData)
+  local previousMessageIndex = message.replyUUID and self.customChat:findMessageByUUID(message.replyUUID)
+  if not previousMessageIndex then
+    return
+  end
+
+  local replyOffset = self.customChat.config.replyOffsetHeight * self.customChat.config.fontSize / 10
+  drawData.reply = {
+    previousMessageIndex = previousMessageIndex,
+    height = replyOffset
+  }
+  drawData.height = drawData.height + replyOffset
+end
+
+function reply:onDrawMessage(message, drawData)
+  local replyData = drawData.reply
+  if not replyData then
+    return
+  end
+
+  local chat = self.customChat
+  local previousMessage = chat.messages[replyData.previousMessageIndex]
+  if not previousMessage then
+    return
+  end
+
+  local size = portraitSizeFromBaseFont(chat.config.fontSize)
+  local xOffset = chat.chatMode == "modern" and chat.config.nameOffset[1] + size or chat.config.textOffsetCompactMode[1]
+  local replyStartOffset = vec2.add({
+    xOffset,
+    drawData.messageOffset + drawData.bodyHeight + drawData.avatarOffset
+  }, chat.config.replyImageOffset)
+
+  chat.canvas:drawImage("/interface/scripted/starcustomchat/plugins/reply/reply.png",
+    replyStartOffset, 1 / 8 * chat.config.fontSize)
+
+  local croppedText = string.format("%s: %s", previousMessage.displayName or previousMessage.nickname,
+    starcustomchat.utils.cropMessage(starcustomchat.utils.clearMetatags(previousMessage.text), chat.canvas:size()[1] // 10))
+
+  chat.canvas:drawText(string.gsub(croppedText, "\n", "    "), {
+    position = vec2.add(replyStartOffset, {size / 2, 0}),
+    horizontalAnchor = "left",
+    verticalAnchor = "bottom"
+  }, chat.config.fontSize / 1.2, chat:getColor("replytext"), nil, chat:getFont("chattext"))
 end
 
 function reply:cropMessage(targetName, text)
@@ -79,16 +125,12 @@ function reply:onSubMenuClose()
 end
 
 function reply:onTextboxEnter()
-  local function calculateNewMessageUUID(connection, text, mode, nickname)
-    return util.hashString(connection .. text)
-  end
-
   if self.replyingToMessage then
     local mode = widget.getSelectedData("rgChatMode").mode
     local nickname = player.name()
 
     local futureMessage = self.customChat.callbackPlugins("formatOutcomingMessage", {
-      text = widget.getText("tbxInput"),
+      text = self.customChat:getText(),
       connection = starcustomchat.utils.entityIdToConnection(player.id()),
       mode = mode,
       nickname = nickname
@@ -96,8 +138,10 @@ function reply:onTextboxEnter()
 
     local dataToSend = {
       originalMessageUUID = self.replyingToMessage.uuid,
-      newMessageUUID = calculateNewMessageUUID(starcustomchat.utils.entityIdToConnection(player.id()), futureMessage.text, 
-        mode, nickname) 
+      newMessageUUID = self.customChat:calculateUUID({
+        connection = starcustomchat.utils.entityIdToConnection(player.id()), text = futureMessage.text, 
+        mode = mode, nickname = nickname
+      }) 
     }
 
     if self.stagehandEnabled and self.stagehandType and self.stagehandType ~= "" then
@@ -170,11 +214,6 @@ function reply:update(dt)
   end
 end
 
-function reply:onBackgroundChange(chatConfig)
-  chatConfig.replyingToMessage = self.replyingToMessage
-  return chatConfig
-end
-
 function reply:onSubMenuReopen(type)
   if type ~= "reply" then
     self.replyingToMessage = nil
@@ -186,13 +225,15 @@ function reply:onCanvasClick(screenPosition, button, isButtonDown)
     return false
   end
 
-  local selectedMessage = self.customChat:selectMessage()
+  local selectedMessage = self.customChat:selectMessage(screenPosition, true)
   if not selectedMessage or not selectedMessage.replyUUID then
     return false
   end
 
-  local clickY = screenPosition[2] - selectedMessage.offset
-  if selectedMessage.height - clickY >= self.customChat.config.replyOffsetHeight then
+  local clickPosition = screenPosition
+  local clickY = clickPosition[2] - selectedMessage.offset
+  local replyOffsetHeight = self.customChat.config.replyOffsetHeight * self.customChat.config.fontSize / 10
+  if selectedMessage.height - clickY >= replyOffsetHeight then
     return false
   end
 
@@ -207,7 +248,10 @@ function reply:onCanvasClick(screenPosition, button, isButtonDown)
   local croppedText = string.format("%s: %s", displayName,
     starcustomchat.utils.cropMessage(cleanText, self.customChat.canvas:size()[1] // 10))
 
-  local textSize = self.customChat:getTextSize(croppedText, self.customChat.config.fontSize * 1.2)
+  local textSize = self.customChat:getTextSize(croppedText, self.customChat.config.fontSize / 1.2)
+  if not textSize then
+    return false
+  end
 
   local size = portraitSizeFromBaseFont(self.customChat.config.fontSize)
   local xOffset = self.customChat.chatMode == "modern"
@@ -215,10 +259,21 @@ function reply:onCanvasClick(screenPosition, button, isButtonDown)
     or self.customChat.config.textOffsetCompactMode[1]
 
   local replyStartOffset = xOffset + self.customChat.config.replyImageOffset[1]
-  local clickX = screenPosition[1]
+  local clickX = clickPosition[1]
 
-  if clickX >= replyStartOffset and clickX <= textSize[1] then
-    self.customChat:scrollToMessage(originalMessageInd, screenPosition[2])
+  if clickX >= replyStartOffset and clickX <= replyStartOffset + size / 2 + textSize[1] then
+    local targetIsInsideChat = originalMessage.offset and originalMessage.height
+      and self.customChat:isInsideChat(
+        originalMessage,
+        originalMessage.offset,
+        self.customChat.config.spacings.name + self.customChat.config.fontSize + 1,
+        self.customChat.canvas:size()
+      )
+
+    if not targetIsInsideChat then
+      self.customChat:scrollToMessage(originalMessageInd, clickPosition[2])
+    end
+
     self.desaturateTime = 0
     self.highlightMessageInd = originalMessageInd
     return true

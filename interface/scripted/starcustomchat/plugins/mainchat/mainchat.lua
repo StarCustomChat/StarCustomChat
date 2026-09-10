@@ -26,15 +26,15 @@ end
 
 function mainchat:registerMessageHandlers()
 
-  starcustomchat.utils.setMessageHandler( "icc_ping", function(_, _, source)
-    starcustomchat.utils.alert("chat.alerts.was_pinged", source)
+  starcustomchat.utils.setMessageHandler( "scc_ping", function(_, _, playerData)
+    local resolvedPlayerData = self.customChat.callbackPlugins("resolvePlayerData", playerData)
+    starcustomchat.utils.alert("chat.alerts.was_pinged", resolvedPlayerData.name)
     if type(self.pingSound) == "table" then
       pane.playSound(self.pingSound[math.random(1, #self.pingSound)])
     else
       pane.playSound(self.pingSound)
     end
   end)
-
 end
 
 function mainchat:onLocaleChange()
@@ -51,24 +51,24 @@ end
 local function isMouseOverPortrait(screenPosition, message)
   local messageOffset = message.offset
   local messageHeight = message.height
+
   local offset = vec2.add(widget.getPosition("chatLog"), self.customChat.config.portraitImageOffset)
-  if pane.getPosition then
-    offset = vec2.add(offset, pane.getPosition())
+  offset = vec2.add(offset, pane.getPosition())
+
+  if message.replyUUID then
+    offset = vec2.sub(offset, {0, self.customChat.config.replyOffsetHeight * self.customChat.config.fontSize / 10})
   end
 
   local size = portraitSizeFromBaseFont(self.customChat.config.fontSize)
+  offset[2] = offset[2] + messageHeight - size
 
-  offset[2] = offset[2] + messageOffset - math.min(messageHeight, size - messageHeight) + self.customChat.config.nameOffset[2] + self.customChat.config.fontSize + 1
-  if message.replyUUID then
-    offset[2] = offset[2] - self.customChat.config.replyOffsetHeight * self.customChat.config.fontSize / 10
-  end
-  
-  return rect.contains({offset[1], offset[2], offset[1] + size, offset[2] + size}, screenPosition)
+  local portraitRect = {offset[1], offset[2] + messageOffset, offset[1] + size, offset[2] + messageOffset + size}
+  return rect.contains(portraitRect, screenPosition)
 end
 
 
 function mainchat:onCursorOverride(screenPosition)
-  local selectedMessage = self.customChat:selectMessage()
+  local selectedMessage = self.customChat:selectMessage(screenPosition)
   if self.previewPortraits and selectedMessage and selectedMessage.connection and 
     (self.customChat.connectionToUuid[tostring(selectedMessage.connection)] or selectedMessage.mode == "RadioMessage" and selectedMessage.portrait) then
     
@@ -168,6 +168,7 @@ function mainchat:formatIncomingMessage(message)
     if message.connection == 0 then
       message.portrait = message.portrait or self.modeIcons.server
       message.nickname = message.nickname or "Server"
+      message.mode = "CommandResult"
       message.color = self.customChat:getColor("servertext")
     else
       message.portrait = message.portrait and message.portrait ~= "" and message.portrait or message.connection
@@ -231,8 +232,8 @@ end
 function mainchat:onTextboxEscape()
   if self.DMingTo then
     self.customChat:closeSubMenu()
-    if widget.getText("tbxInput") == "" then
-      widget.blur("tbxInput")
+    if self.customChat:getText() == "" then
+      self.customChat:blurInput()
     end
     self.DMingTo = nil
     return true
@@ -253,11 +254,32 @@ function mainchat:onTextboxEnter(message)
   end
 
   if string.sub(message.text, 1, 1) == "@" then
+    if message.pingTarget then
+      self:ping(message.pingTarget.entityId, message.pingTarget.name)
+      return true
+    end
+
     local name = string.sub(message.text, 2, string.len(message.text)):gsub("%s+$", "")
+    local function getResolvedPlayerName(entityId)
+      local playerData = {
+        name = world.entityName(entityId),
+        entityId = entityId,
+        uuid = world.entityUniqueId(entityId)
+      }
+      local resolvedPlayerData = self.customChat.callbackPlugins("resolvePlayerData", playerData)
+      return resolvedPlayerData and resolvedPlayerData.name or playerData.name or "Unknown"
+    end
+
     if string.len(message.text) > 1 then
+      local entityId = tonumber(name)
+      if entityId and world.entityExists(entityId) then
+        self:ping(entityId, getResolvedPlayerName(entityId))
+        return true
+      end
+
       for _, pl in ipairs(starcustomchat.utils.playersInRadius()) do 
         if name == world.entityName(pl) then
-          self:ping(pl, name)
+          self:ping(pl, getResolvedPlayerName(pl))
           return true
         end
       end
@@ -266,11 +288,6 @@ function mainchat:onTextboxEnter(message)
     starcustomchat.utils.alert("chat.alerts.ping_failed", name)
     return true
   end
-end
-
-function mainchat:onBackgroundChange(chatConfig)
-  chatConfig.DMingTo = self.DMingTo and self.DMingTo.uuid or nil
-  return chatConfig
 end
 
 function mainchat:onSubMenuReopen(type)
@@ -290,11 +307,11 @@ function mainchat:contextMenuButtonClick(buttonName, selectedMessage)
     elseif buttonName == "dm" then
       self.DMingTo = selectedMessage
       self.customChat:openSubMenu("DMs", starcustomchat.utils.getTranslation("chat.dming.hint"), selectedMessage.displayName or selectedMessage.nickname)
-      widget.focus("tbxInput")
+      self.customChat:focusInput()
 
     elseif buttonName == "ping" then
       local target = starcustomchat.utils.connectionToEntityId(selectedMessage.connection)
-      self:ping(target, selectedMessage.nickname)
+      self:ping(target, selectedMessage.displayName or selectedMessage.nickname)
 
     elseif buttonName == "collapse" then
       self.customChat:collapseMessage({0, selectedMessage.offset + 1})
@@ -304,14 +321,14 @@ function mainchat:contextMenuButtonClick(buttonName, selectedMessage)
   end
 end
 
-function mainchat:ping(connectionId, name)
+function mainchat:ping(entityId, name)
   if self.ReplyTime > 0 then
     starcustomchat.utils.alert("chat.alerts.cannot_ping_time", math.ceil(self.ReplyTime))
   else
-    if connectionId == player.id() then
+    if entityId == player.id() then
       starcustomchat.utils.alert("chat.alerts.cannot_ping_yourself")
     else
-      promises:add(world.sendEntityMessage(connectionId, "icc_ping", player.name()), function()
+      promises:add(world.sendEntityMessage(entityId, "scc_ping", starcustomchat.utils.playerData()), function()
         starcustomchat.utils.alert("chat.alerts.pinged", name)
       end, function()
         starcustomchat.utils.alert("chat.alerts.ping_failed", name)
@@ -325,14 +342,14 @@ end
 function mainchat:onSubMenuClose()
   if self.DMingTo then
     self.DMingTo = nil
-    if widget.getText("tbxInput") ~= "" then
-      widget.focus("tbxInput")
+    if self.customChat:getText() ~= "" then
+      self.customChat:focusInput()
     end
   end
 end
 
 function mainchat:onCreateTooltip(screenPosition)
-  local selectedMessage = self.customChat:selectMessage()
+  local selectedMessage = self.customChat:selectMessage(screenPosition)
   
   if selectedMessage and selectedMessage and selectedMessage.tooltip then
     return starcustomchat.utils.hasTranslation(selectedMessage.tooltip) and starcustomchat.utils.getTranslation(selectedMessage.tooltip)

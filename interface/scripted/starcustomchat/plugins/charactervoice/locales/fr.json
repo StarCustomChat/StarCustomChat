@@ -3,6 +3,7 @@
     "settings.plugins.charactervoice.enable": "Activé",
     "settings.plugins.charactervoice.enablewhisper": "Voix en MP",
     "settings.plugins.charactervoice.pitch": "Intonation",
+    "settings.plugins.charactervoice.volume": "Volume",
     "settings.plugins.charactervoice.test": "Test",
     "settings.plugins.charactervoice.description": "Lors de l’envoi d’un message, votre personnage parlera avec la voix sélectionnée",
     "settings.plugins.charactervoice.wisperDescription": "Lors de l’envoi d’un message privé, votre personnage parlera avec la voix sélectionnée",

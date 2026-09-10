@@ -6,7 +6,6 @@ colors = SettingsPluginClass:new(
 )
 
 function colors:init(chat)
-  self:_loadConfig()
   self.picker = colorpicker.new(self.layoutWidget .. ".cnvColorPicker")
   self.currentColor = ""
   self.coursorCanvas = self.widget.bindCanvas("coursorCanvas")

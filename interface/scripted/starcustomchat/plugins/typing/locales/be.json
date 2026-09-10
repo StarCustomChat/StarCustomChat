@@ -1,0 +1,9 @@
+{
+    "chat.typing.typing_one": "%s друкуе",
+    "chat.typing.typing_few": "%s і %s друкуюць",
+    "chat.typing.typing_multiple": "Некалькі чалавек друкуюць",
+
+    "settings.plugins.typing": "Індыкатар друку",
+    "settings.plugins.typing.player_portraits": "Індыкатары друку на партрэтах\n^gray;(Толькі Сучасны рэжым)",
+    "settings.plugins.typing.status_message": "Паведамленне пра друк"
+}

@@ -3,6 +3,7 @@
     "settings.plugins.charactervoice.enable": "Увімкнено",
     "settings.plugins.charactervoice.enablewhisper": "Балакати при ОП",
     "settings.plugins.charactervoice.pitch": "Тон",
+    "settings.plugins.charactervoice.volume": "Гучність",
     "settings.plugins.charactervoice.test": "Тест",
     "settings.plugins.charactervoice.description": "При відправці повідомлення грає обраний звук розмови",
     "settings.plugins.charactervoice.wisperDescription": "При відправці повідомлення в особисті грає обраний звук розмови",

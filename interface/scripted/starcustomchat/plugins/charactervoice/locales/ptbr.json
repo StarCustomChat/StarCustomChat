@@ -3,6 +3,7 @@
     "settings.plugins.charactervoice.enable": "Ativado",
     "settings.plugins.charactervoice.enablewhisper": "Som de Mensagem Direta",
     "settings.plugins.charactervoice.pitch": "Tom",
+    "settings.plugins.charactervoice.volume": "Volume",
     "settings.plugins.charactervoice.test": "Teste",
     "settings.plugins.charactervoice.description": "Ao enviar uma mensagem, toca o som escolhido",
     "settings.plugins.charactervoice.wisperDescription": "Ao enviar uma mensagem direta, toca o som escolhido",

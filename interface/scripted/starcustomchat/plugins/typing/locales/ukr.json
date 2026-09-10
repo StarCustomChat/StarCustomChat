@@ -1,0 +1,9 @@
+{
+    "chat.typing.typing_one": "%s набирає текст",
+    "chat.typing.typing_few": "%s і %s набирають текст",
+    "chat.typing.typing_multiple": "Кілька людей набирають текст",
+
+    "settings.plugins.typing": "Індикація набору тексту",
+    "settings.plugins.typing.player_portraits": "Портретні індикатори набору тексту\n^gray;(лише в сучасному режимі)",
+    "settings.plugins.typing.status_message": "Повідомлення про стан набору тексту"
+}

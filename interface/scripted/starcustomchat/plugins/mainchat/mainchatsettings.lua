@@ -5,7 +5,6 @@ mainchat = SettingsPluginClass:new(
 )
 
 function mainchat:init()
-  self:_loadConfig()
   self.availableModes = {"compact", "modern"}
 
   self.chatMode = root.getConfiguration("sccMode") or "modern"

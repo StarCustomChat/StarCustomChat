@@ -7,14 +7,16 @@
   "chat.modes.Whisper": "Личные",
   "chat.modes.RadioMessage": "Броски",
   "chat.modes.CommandResult": "Команды",
+  "chat.message.edited": "изменено",
 
   "chat.textbox.hint": "Введите сообщение",
+  "chat.textbox.hint.filter": "Фильтрация сообщений (\"%s\")",
 
   "chat.buttons.bottom": "Отмотать вниз",
   "chat.buttons.settings": "Настройки",
   "chat.buttons.hide": "Скрыть чат",
-  "chat.buttons.bigger_chat": "Большой чат",
   "chat.buttons.move_chat": "Двигать чат",
+  "chat.buttons.resize_chat": "Изменить размер чата",
 
   "chat.alerts.dm_not_specified": "Выбери персонажа, чтобы отправить текст",
   "chat.alerts.dm_not_found": "Игрок не на планете",
@@ -47,6 +49,12 @@
   "settings.back": "Назад",
   "settings.add": "Добавить",
   "settings.remove": "Удалить",
+  "settings.search": "Поиск...",
+
+
+  "chat.commands.unknown_argument": "Неизвестный аргумент: %s",
+  "chat.commands.unknown_argument_expected": "Неизвестный аргумент: %s, допустимы %s",
+
 
   "commands.general.admin": "Включает или отключает режим администратора, который включает все рецепты крафта, предотвращает повреждения или потерю энергии и позволяет использовать команды только для администраторов.",
   "commands.general.help": "Используйте /help commandName для получения подробной документации.",
@@ -116,19 +124,6 @@
   "commands.debug.togglelayer": "Переключает слой.",
   "commands.debug.upgradeship": "Улучшает корабль.",
 
-  "commands.starextentions.binds": "Отображает все привязки клавиш.",
-  "commands.starextentions.breathing": "Переключает дыхание.",
-  "commands.starextentions.guide": "Отображает руководство.",
-  "commands.starextentions.voice": "Переключает голосовой чат.",
-  "commands.starextentions.swap": "Сменить персонажа.",
-  "commands.starextentions.editor": "Открывает редактор.",
-  "commands.starextentions.identity": "Управляет настройками идентичности.",
-  "commands.starextentions.identity.set": "Устанавливает атрибуты идентичности.",
-  "commands.starextentions.identity.get": "Получает атрибуты идентичности.",
-  "commands.starextentions.speech": "Переключает речь.",
-  "commands.starextentions.nightvision": "Переключает ночное видение.",
-  "commands.starextentions.render": "Скопировать спрайты персонажа в буфер обмена.",
-
   "commands.openstarbound.swap": "Сменить персонажа.",
   "commands.openstarbound.identity": "Управляет настройками идентичности.",
   "commands.openstarbound.identity.set": "Устанавливает атрибуты идентичности.",
@@ -136,6 +131,7 @@
   "commands.openstarbound.render": "Сгенерировать выбранное изображение в папке storage.",
 
   "commands.starcustomchat.clearchat": "Очищает историю чата.",
+  "commands.starcustomchat.filter": "Фильтр истории чата по подстроке. Пустая подстрока очищает фильтр.",
 
   "commands.custom.hotreload": "Перезагружает конфигурацию."
 }

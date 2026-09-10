@@ -21,8 +21,11 @@ end
 function modesounds:onReceiveMessage(message)
   if message.mode and self.modeSoundTable[message.mode] then
     local sound = self.modeSoundTable[message.mode]
-    if sound and message.nickname ~= player.name() then
+    if sound and message.connection ~= starcustomchat.utils.entityIdToConnection(player.id()) then
       pane.playSound(sound)
+      timers:add(self.cutoffTime, function()
+        pane.stopAllSounds(sound)
+      end)
     end
   end
   return message

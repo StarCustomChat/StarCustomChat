@@ -7,14 +7,16 @@
   "chat.modes.Whisper": "Flüstern",
   "chat.modes.RadioMessage": "Radioübertragung",
   "chat.modes.CommandResult": "Befehlsausgabe",
+  "chat.message.edited": "Bearbeitet",
 
   "chat.textbox.hint": "Hier schreiben",
+  "chat.textbox.hint.filter": "Nachrichten filtern (\"%s\")",
 
   "chat.buttons.bottom": "Nach unten",
   "chat.buttons.settings": "Einstellungen",
   "chat.buttons.hide": "Chat verbergen",
-  "chat.buttons.bigger_chat": "Größerer Chat",
   "chat.buttons.move_chat": "Chat verschieben",
+  "chat.buttons.resize_chat": "Chatgröße ändern",
 
   "chat.alerts.dm_not_specified": "Wähle den Empfänger",
   "chat.alerts.dm_not_found": "Der Spieler muss auf demselben Planeten sein",
@@ -48,6 +50,11 @@
   "settings.back": "Zurück",
   "settings.add": "Hinzufügen",
   "settings.remove": "Entfernen",
+  "settings.search": "Suchen...",
+
+
+  "chat.commands.unknown_argument": "Unbekanntes Argument: %s",
+  "chat.commands.unknown_argument_expected": "Unbekanntes Argument: %s, zulässig sind %s",
 
 
   "commands.general.admin": "Aktiviert oder deaktiviert den Admin-Modus, welcher alle Crafting-Rezepte erlaubt, Schaden und Energieverlust verhindert und Zugriff auf Admin-Commands verleiht.",
@@ -118,19 +125,6 @@
   "commands.debug.togglelayer": "Schaltet die Sichtbarkeit einer Schicht um.",
   "commands.debug.upgradeship": "Upgradet das Schiff.",
 
-  "commands.starextentions.binds": "Gibt alle Tastenbelegungen aus.",
-  "commands.starextentions.breathing": "Schaltet Atmung um.",
-  "commands.starextentions.guide": "Zeigt Guide an.",
-  "commands.starextentions.voice": "Schaltet Sprachchat um.",
-  "commands.starextentions.swap": "Wechselt den Charakter.",
-  "commands.starextentions.editor": "Öffnet den Editor.",
-  "commands.starextentions.identity": "Öffnet Identity-Einstellungen.",
-  "commands.starextentions.identity.set": "Legt Identity-Attribute fest.",
-  "commands.starextentions.identity.get": "Gibt Identity-Attribute aus.",
-  "commands.starextentions.speech": "Schaltet Text-to-Speech um.",
-  "commands.starextentions.nightvision": "Schaltet Nachtsicht um.",
-  "commands.starextentions.render": "Rendert Teile des Charakters und kopiert sie in die Zwischenablage",
-
   "commands.openstarbound.swap": "Wechselt den Charakter.",
   "commands.openstarbound.identity": "Öffnet Identity-Einstellungen.",
   "commands.openstarbound.identity.set": "Legt Identity-Attribute fest.",
@@ -138,6 +132,7 @@
   "commands.openstarbound.render": "Rendert Teile des Charakters und speichert sie im Storage-Ordner.",
 
   "commands.starcustomchat.clearchat": "Löscht Chatverlauf.",
+  "commands.starcustomchat.filter": "Filtert Nachrichten nach einem Substring. Leer lassen, um Filter zu deaktivieren.",
 
   "commands.custom.hotreload": "Lädt die Konfiguration neu."
 }

@@ -7,14 +7,16 @@
   "chat.modes.Whisper": "Особисті",
   "chat.modes.RadioMessage": "Радіоповідомлення",
   "chat.modes.CommandResult": "Рузультати команд",
+  "chat.message.edited": "відредаговано",
 
   "chat.textbox.hint": "Писати тут",
+  "chat.textbox.hint.filter": "Фільтрування повідомлень (\"%s\")",
 
   "chat.buttons.bottom": "До низу",
   "chat.buttons.settings": "Налаштування",
   "chat.buttons.hide": "Сховати чат",
-  "chat.buttons.bigger_chat": "Великий чат",
   "chat.buttons.move_chat": "Рухати чат",
+  "chat.buttons.resize_chat": "Змінити розмір чату",
 
   "chat.alerts.dm_not_specified": "Оберіть одержувача",
   "chat.alerts.dm_not_found": "Гравець повинен бути на планеті",
@@ -47,8 +49,11 @@
   "settings.back": "Назад",
   "settings.add": "Додати",
   "settings.remove": "Видалити",
+  "settings.search": "Пошук...",
 
 
+  "chat.commands.unknown_argument": "Невідомий аргумент: %s",
+  "chat.commands.unknown_argument_expected": "Невідомий аргумент: %s, допустимі значення: %s",
 
 
   "commands.general.admin": "Вмикає та вимикає режим адміністратора, це відркиває всі рецепти для крафту, запобігає отриманню ушкоджень та втраті енергії, також дозволяє використовувати адміністративні команди.",
@@ -119,19 +124,6 @@
   "commands.debug.togglelayer": "Увімкнути/вимкнути шар.",
   "commands.debug.upgradeship": "Поліпшити корабель.",
 
-  "commands.starextentions.binds": "Відобразити всі прив'язки клавіш.",
-  "commands.starextentions.breathing": "Увімкнути/вимкнути дихання.",
-  "commands.starextentions.guide": "Відобразити посібник.",
-  "commands.starextentions.voice": "Увімкнути/вимкнути голосовий чат.",
-  "commands.starextentions.swap": "Поміняти поточного персонажа.",
-  "commands.starextentions.editor": "Відкрити редактор.",
-  "commands.starextentions.identity": "Керувати налаштуванням ідентичності.",
-  "commands.starextentions.identity.set": "Встановити атрибути ідентичності.",
-  "commands.starextentions.identity.get": "Отримати атрибути ідентичності.",
-  "commands.starextentions.speech": "Увімкнути/вимкнути мову.",
-  "commands.starextentions.nightvision": "Увімкнути/вимкнути нічне бачення.",
-  "commands.starextentions.render": "Відібразити різні частини персонажа та скопіювати у буфер обміну.",
-
   "commands.openstarbound.swap": "Поміняти поточного персонажа.",
   "commands.openstarbound.identity": "Керувати налаштуваннями ідентичності.",
   "commands.openstarbound.identity.set": "Встановити атрибути ідентичності.",
@@ -139,6 +131,7 @@
   "commands.openstarbound.render": "Відібразити різні частини персонажа та скопіювати у буфер обміну.",
 
   "commands.starcustomchat.clearchat": "Очистити історію чату.",
+  "commands.starcustomchat.filter": "Фільтрує повідомлення за підрядком. Відправте порожнє значення, щоб вимкнути фільтрацію.",
 
   "commands.custom.hotreload": "Швидко перезавантажує конфігурацію."
 }

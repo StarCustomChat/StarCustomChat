@@ -7,14 +7,16 @@
   "chat.modes.Whisper": "Sussurra",
   "chat.modes.RadioMessage": "Messaggi Radio",
   "chat.modes.CommandResult": "Comandi",
+  "chat.message.edited": "Modificato",
 
   "chat.textbox.hint": "Scrivi qui",
+  "chat.textbox.hint.filter": "Filtraggio dei messaggi (\"%s\")",
 
   "chat.buttons.bottom": "Scorri giù",
   "chat.buttons.settings": "Impostazioni",
   "chat.buttons.hide": "Nascondi chat",
-  "chat.buttons.bigger_chat": "Estendi chat",
   "chat.buttons.move_chat": "Sposta chat",
+  "chat.buttons.resize_chat": "Ridimensiona chat",
 
   "chat.alerts.dm_not_specified": "Seleziona il ricevente",
   "chat.alerts.dm_not_found": "Il giocatore deve essere nello stesso pianeta",
@@ -47,8 +49,11 @@
   "settings.back": "Indietro",
   "settings.add": "Aggiugni",
   "settings.remove": "Rimuovi",
+  "settings.search": "Cerca...",
 
 
+  "chat.commands.unknown_argument": "Argomento sconosciuto: %s",
+  "chat.commands.unknown_argument_expected": "Argomento sconosciuto: %s, sono ammessi %s",
 
 
   "commands.general.admin": "Abilita o disabilita la modalità admin, che sblocca tutti i crafting, nega danni e consumo di energia, e permette l'accesso ai comandi admin.",
@@ -119,19 +124,6 @@
   "commands.debug.togglelayer": "Gestisci un layer.",
   "commands.debug.upgradeship": "Potenzia l'astronave.",
 
-  "commands.starextentions.binds": "Mostra tutti i comandi di gioco.",
-  "commands.starextentions.breathing": "Gestisci animazione di respiro.",
-  "commands.starextentions.guide": "Mostra la guida.",
-  "commands.starextentions.voice": "Gestisci chat vocale.",
-  "commands.starextentions.swap": "Cambia il personaggio attuale.",
-  "commands.starextentions.editor": "Apri l'editor.",
-  "commands.starextentions.identity": "Modifica le impostazioni di identità del personaggio..",
-  "commands.starextentions.identity.set": "Imposta attributi identità del personaggio.",
-  "commands.starextentions.identity.get": "Ricevi attributi identità del personaggio.",
-  "commands.starextentions.speech": "Gestisci vignette.",
-  "commands.starextentions.nightvision": "Gestisci visione notturna.",
-  "commands.starextentions.render": "Renderizza parti del personaggio e salva negli Appunti.",
-
   "commands.openstarbound.swap": "Cambia il personaggio attuale.",
   "commands.openstarbound.identity": "Modifica le impostazioni di identità del personaggio.",
   "commands.openstarbound.identity.set": "Imposta attributi identità del personaggio.",
@@ -139,6 +131,7 @@
   "commands.openstarbound.render": "Renderizza parti del personaggio e salva negli Appunti.",
 
   "commands.starcustomchat.clearchat": "Cancella la cronologia della chat.",
+  "commands.starcustomchat.filter": "Filtra i messaggi in base a una sottostringa. Invia un messaggio vuoto per disabilitare il filtro.",
 
   "commands.custom.hotreload": "Riavvia la configurazione."
 }

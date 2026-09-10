@@ -7,6 +7,8 @@ function contextMenu_init(buttonsConfig)
   self.contextMenu.isInContext = false
   self.contextMenu.lastSelectedUUID = nil
   self.contextMenu.pressedParents = {}
+  self.contextMenu.keepDotsUntilExit = false
+  self.contextMenu.preserveCompoundMenu = false
 
   local position = {0, 0}
 
@@ -47,60 +49,83 @@ function contextMenu_init(buttonsConfig)
   end
 end
 
-function processContextMenu(screenPosition)
-  widget.setVisible("lytContext", not not self.selectedMessage)
+function rebuildContextMenu(screenPosition)
+  local layoutSize = {0, self.contextMenu.dotsSize[2]}
 
-  if widget.inMember(self.highlightCanvasName, screenPosition) then
-    self.selectedMessage = self.customChat:selectMessage(widget.inMember("lytContext", screenPosition) and self.selectedMessage and {0, self.selectedMessage.offset + 1})
-  else
+  for _, btnConfig in ipairs(self.contextMenu.buttonConfigs) do
+    local buttonName = btnConfig.name
+
+    if (not self.contextMenu.pressedParents[buttonName])
+    and (not btnConfig.parent or self.contextMenu.pressedParents[btnConfig.parent])
+    and self.runCallbackForPlugins("contextMenuButtonFilter", buttonName, screenPosition, self.selectedMessage) then
+      widget.setPosition("lytContext." .. buttonName, {layoutSize[1], 0})
+      widget.setVisible("lytContext." .. buttonName, true)
+      layoutSize[1] = layoutSize[1] + btnConfig.size[1]
+    else
+      widget.setVisible("lytContext." .. buttonName, false)
+      widget.setPosition("lytContext." .. buttonName, {0, 0})
+    end
+  end
+  widget.setVisible("lytContext.dots", false)
+  widget.setSize("lytContext", layoutSize)
+
+  self.contextMenu.lastSelectedUUID = self.selectedMessage and self.selectedMessage.uuid or nil
+  self.contextMenu.rebuildMenu = nil
+end
+
+function resetContextMenu()
+  self.runCallbackForPlugins("contextMenuReset")
+
+  widget.setVisible("lytContext.dots", true)
+  for _, btnConfig in ipairs(self.contextMenu.buttonConfigs) do
+    widget.setVisible("lytContext." .. btnConfig.name, false)
+  end
+
+  widget.setSize("lytContext", self.contextMenu.dotsSize)
+  self.contextMenu.lastSelectedUUID = nil
+  self.contextMenu.pressedParents = {}
+  self.contextMenu.rebuildMenu = nil
+end
+
+function processContextMenu(screenPosition)
+  self.contextMenu.lastScreenPosition = screenPosition
+
+  -- Clear selection if the selected message was deleted
+  if self.selectedMessage and not self.customChat:findMessageByUUID(self.selectedMessage.uuid) then
     self.selectedMessage = nil
   end
 
+  widget.setVisible("lytContext", not not self.selectedMessage)
+
+  if not widget.inMember("lytContext", screenPosition) or not self.selectedMessage then
+    self.selectedMessage = self.customChat:selectMessage(screenPosition)
+  end
+
+  if self.selectedMessage then
+    self.customChat:highlightMessage(self.selectedMessage)
+  end
+
   -- determine current hover / selection identity
-  local inContext = widget.inMember("lytContext", screenPosition) or rect.contains(rect.withSize(widget.getPosition("lytContext"), widget.getSize("lytContext")), screenPosition) 
+  local inContext = widget.inMember("lytContext", screenPosition)
+
   local prevSelectedUUID = self.contextMenu.lastSelectedUUID
   local selectedUUID = self.selectedMessage and self.selectedMessage.uuid or nil
 
   if inContext then
     -- only rebuild the visible buttons/layout if selection changed or we just started hovering
-    if selectedUUID ~= prevSelectedUUID or inContext ~= self.contextMenu.isInContext or self.contextMenu.rebuildMenu then
-      local layoutSize = {0, self.contextMenu.dotsSize[2]}
-
-      for _, btnConfig in ipairs(self.contextMenu.buttonConfigs) do 
-        local buttonName = btnConfig.name
-
-        if (not self.contextMenu.pressedParents[buttonName]) 
-        and (not btnConfig.parent or self.contextMenu.pressedParents[btnConfig.parent])
-        and self.runCallbackForPlugins("contextMenuButtonFilter", buttonName, screenPosition, self.selectedMessage) then
-          widget.setPosition("lytContext." .. buttonName, {layoutSize[1], 0})
-          widget.setVisible("lytContext." .. buttonName, true)
-          layoutSize[1] = layoutSize[1] + btnConfig.size[1]
-        else
-          widget.setVisible("lytContext." .. buttonName, false)
-          widget.setPosition("lytContext." .. buttonName, {0, 0})
-        end
-      end
-      widget.setVisible("lytContext.dots", false)
-      widget.setSize("lytContext", layoutSize)
-
-      -- remember state so we don't do this again until it changes
-      self.contextMenu.lastSelectedUUID = selectedUUID
-      self.contextMenu.rebuildMenu = nil
+    if not self.contextMenu.keepDotsUntilExit
+    and (selectedUUID ~= prevSelectedUUID or inContext ~= self.contextMenu.isInContext or self.contextMenu.rebuildMenu) then
+      rebuildContextMenu(screenPosition)
     end
   else
     -- only run reset once when we stop hovering
     if self.contextMenu.isInContext then
-      self.runCallbackForPlugins("contextMenuReset")
-      
-      widget.setVisible("lytContext.dots", true)
-      for _, btnConfig in ipairs(self.contextMenu.buttonConfigs) do
-        widget.setVisible("lytContext." .. btnConfig.name, false)
+      if self.contextMenu.preserveCompoundMenu then
+        self.contextMenu.preserveCompoundMenu = false
+      else
+        self.contextMenu.keepDotsUntilExit = false
+        resetContextMenu()
       end
-
-      widget.setSize("lytContext", self.contextMenu.dotsSize)
-      -- clear remembered selection because we're no longer showing the menu
-      self.contextMenu.lastSelectedUUID = nil
-      self.contextMenu.pressedParents = {}
     end
   end
 
@@ -116,8 +141,11 @@ function setLayoutPosition()
     local yOffset = self.selectedMessage.offset + self.selectedMessage.height + canvasPosition[2]
     local newOffset = vec2.add({xOffset, yOffset}, self.customChat.config.contextMenuOffset)
 
-    -- And now we don't want the context menu to fly away somewhere else: we always want to draw it within the canvas
-    newOffset[2] = math.min(newOffset[2], self.customChat.canvas:size()[2] + widget.getPosition(self.canvasName)[2] - widget.getSize("lytContext")[2])
+    -- And now we don't want the context menu to fly away somewhere else: we always want to draw it within the canvas. Add padding
+    local canvasTop = self.customChat.canvas:size()[2] + widget.getPosition(self.canvasName)[2]
+    local menuSize = widget.getSize("lytContext")
+    newOffset[1] = math.max(canvasPosition[1], math.min(newOffset[1], canvasPosition[1] + widget.getSize(self.highlightCanvasName)[1] - menuSize[1]))
+    newOffset[2] = math.max(canvasPosition[2], math.min(newOffset[2], canvasTop - menuSize[2]) - 2)
     widget.setPosition("lytContext", newOffset)
   end
 end
@@ -136,6 +164,15 @@ function contextMenuButtonClick(buttonName)
   end
 
   
-  self.contextMenu.rebuildMenu = true
   self.runCallbackForPlugins("contextMenuButtonClick", buttonName, self.selectedMessage)
+
+  if pressedButtonConf.hasChildren then
+    self.contextMenu.keepDotsUntilExit = false
+    self.contextMenu.preserveCompoundMenu = true
+    rebuildContextMenu(self.contextMenu.lastScreenPosition)
+    setLayoutPosition()
+  else
+    self.contextMenu.keepDotsUntilExit = true
+    resetContextMenu()
+  end
 end

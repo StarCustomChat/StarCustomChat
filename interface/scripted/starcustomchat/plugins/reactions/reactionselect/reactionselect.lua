@@ -62,9 +62,12 @@ function onEmojiSelect(listName)
   if li then
     local selectedReaction = widget.getData("sa_All." .. listName .. "." .. li)
     local data = {
-      nickname = player.name(),
       reaction = selectedReaction,
-      uuid = config.getParameter("messageUUID")
+      uuid = config.getParameter("messageUUID"),
+      source = {
+        name = player.name(),
+        uuid = player.uniqueId()
+      }
     }
 
     

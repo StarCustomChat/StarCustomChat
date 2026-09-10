@@ -1,0 +1,9 @@
+{
+    "settings.plugins.colors": "Колеры",
+    "settings.colors.drop_to_default": "Па змаўчанні",
+    "settings.colors.chattext": "Тэкст чата",
+    "settings.colors.background": "Фон",
+    "settings.colors.time": "Час",
+    "settings.colors.servertext": "Серверныя паведамленні",
+    "settings.colors.commandselect": "Каманда"
+}

@@ -45,14 +45,16 @@
                   "type" : "image",
                   "file" : "/interface/scripted/starcustomchat/plugins/modesounds/listunselected.png",
                   "position" : [2, 0],
-                  "zlevel" : -1
+                  "zlevel" : -1,
+                  "mouseTransparent": true
                 },
                 "name" : {
                   "type" : "label",
                   "hAnchor": "mid",
                   "vAnchor": "mid",
                   "position": [37, 7],
-                  "wrapWidth": 70
+                  "wrapWidth": 70,
+                  "mouseTransparent": true
                 }
               }
             }
@@ -71,7 +73,8 @@
 
       "saSounds": {
         "type": "scrollArea",
-        "rect": [100, 35, 230, 110],
+        "visible": false,
+        "rect": [90, 35, 230, 110],
         "children": {
           "listItems": {
             "type": "list",
@@ -80,24 +83,35 @@
               "selectedBG" : "/interface/scripted/starcustomchat/plugins/modesounds/listselected.png",
               "unselectedBG" : "/interface/scripted/starcustomchat/plugins/modesounds/listunselected.png",
               "spacing" : [0, 1],
-              "memberSize" : [130, 15],
+              "memberSize" : [140, 15],
               "listTemplate" : {
                 "background" : {
                   "type" : "image",
                   "file" : "/interface/scripted/starcustomchat/plugins/modesounds/listunselected.png",
                   "position" : [0, 0],
-                  "zlevel" : -1
+                  "zlevel" : -1,
+                  "mouseTransparent": true
                 },
                 "name" : {
                   "type" : "label",
                   "vAnchor": "mid",
                   "position": [5, 7],
-                  "wrapWidth": 125
+                  "wrapWidth": 125,
+                  "mouseTransparent": true
                 }
               }
             }
           }
         }
+      },
+
+      "tbxFilter": {
+        "type": "textbox",
+        "callback": "searchSound",
+        "position": [90, 24],
+        "visible": false,
+        "maxWidth": 140,
+        "hintTranslationKey": "settings.search"
       },
 
       "btnClear": {
@@ -116,7 +130,7 @@
   },
 
   "parameters": {
-    "sounds": ["/sfx/instruments/bones/a4.ogg", "/sfx/interface/aichatter1.ogg", "/sfx/interface/aichatter2.ogg"]
+    "cutoffTime": 2
   },
 
   "script": "/interface/scripted/starcustomchat/plugins/modesounds/modesounds.lua",

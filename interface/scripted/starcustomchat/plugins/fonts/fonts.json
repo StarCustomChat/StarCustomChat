@@ -33,16 +33,6 @@
         "translationKey": "settings.plugins.fonts"
       },
 
-      "btnDropToDefault": {
-        "type": "button",
-        "base": "/interface/buttonred.png",
-        "hover": "/interface/buttonredhover.png",
-        "position": [140, 45],
-        "visible": false,
-        "callback": "dropToDefault",
-        "translationKey": "settings.fonts.drop_to_default"
-      },
-
       "saScrollArea": {
         "type": "scrollArea",
         "rect": [5, 35, 65, 130],
@@ -77,7 +67,8 @@
 
       "lblSetFont": {
         "type": "label",
-        "position": [160, 100],
+        "position": [150, 100],
+        "fontSize": 12,
         "hAnchor": "mid",
         "value": "",
         "translationKey": "settings.fonts.setFont"
@@ -85,12 +76,22 @@
 
       "btnSelectFont": {
         "type": "button",
-        "position": [105, 80],
+        "position": [70, 60],
         "caption": "...",
         "visible": false,
-        "callback": "testFonts",
-        "base": "/interface/scripted/starcustomchat/plugins/fonts/buttonlarge.png",
-        "hover": "/interface/scripted/starcustomchat/plugins/fonts/buttonlargehover.png"
+        "callback": "openCombobox",
+        "base": "/interface/scripted/starcustomchatsettings/images/common/buttonlarge.png:base",
+        "hover": "/interface/scripted/starcustomchatsettings/images/common/buttonlarge.png:hover"
+      },
+
+      "btnDropToDefault": {
+        "type": "button",
+        "base": "/interface/buttonred.png",
+        "hover": "/interface/buttonredhover.png",
+        "position": [180, 60],
+        "visible": false,
+        "callback": "dropToDefault",
+        "translationKey": "settings.fonts.drop_to_default"
       }
     }
   },

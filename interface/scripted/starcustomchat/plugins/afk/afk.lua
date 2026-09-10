@@ -25,6 +25,17 @@ function afk:init(chat)
   self.buttonPressed = false
 end
 
+function afk:registerMessageHandlers()
+  starcustomchat.utils.setMessageHandler("/afk", function(_, isLocal, data)
+    if isLocal then
+      self.forcedAfkTimer = self.forcedAfkTimer == 0 and self.afkIgnoreTime or 0
+      self.buttonPressed = true
+      self.afkTime = 0
+      self:activateAFK()
+    end
+  end)
+end
+
 function afk:update(dt)
 
   if self.forcedAfkTimer > 0 then

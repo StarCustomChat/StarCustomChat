@@ -7,14 +7,16 @@
   "chat.modes.Whisper": "Whisper",
   "chat.modes.RadioMessage": "RadioMessage",
   "chat.modes.CommandResult": "CommandResult",
+  "chat.message.edited": "edited",
 
   "chat.textbox.hint": "Type here",
+  "chat.textbox.hint.filter": "Filtering messages (\"%s\")",
 
   "chat.buttons.bottom": "To bottom",
   "chat.buttons.settings": "Settings",
   "chat.buttons.hide": "Hide chat",
-  "chat.buttons.bigger_chat": "Bigger chat",
   "chat.buttons.move_chat": "Move chat",
+  "chat.buttons.resize_chat": "Resize chat",
 
   "chat.alerts.dm_not_specified": "Select the recipient",
   "chat.alerts.dm_not_found": "The player has to be on the same planet",
@@ -47,8 +49,11 @@
   "settings.back": "Back",
   "settings.add": "Add",
   "settings.remove": "Remove",
+  "settings.search": "Search...",
 
 
+  "chat.commands.unknown_argument": "Unknown argument: %s",
+  "chat.commands.unknown_argument_expected": "Unknown argument: %s, expected %s",
 
 
   "commands.general.admin": "Enables or disables admin mode, which enables all crafting recipes, prevents damage or energy loss, and allows access to admin-only commands.",
@@ -119,19 +124,6 @@
   "commands.debug.togglelayer": "Toggles a layer.",
   "commands.debug.upgradeship": "Upgrades the ship.",
 
-  "commands.starextentions.binds": "Displays all key binds.",
-  "commands.starextentions.breathing": "Toggles breathing.",
-  "commands.starextentions.guide": "Displays the guide.",
-  "commands.starextentions.voice": "Toggles voice chat.",
-  "commands.starextentions.swap": "Swap current character.",
-  "commands.starextentions.editor": "Opens the editor.",
-  "commands.starextentions.identity": "Manages identity settings.",
-  "commands.starextentions.identity.set": "Sets identity attributes.",
-  "commands.starextentions.identity.get": "Gets identity attributes.",
-  "commands.starextentions.speech": "Toggles speech.",
-  "commands.starextentions.nightvision": "Toggles night vision.",
-  "commands.starextentions.render": "Renders various parts of the character and copies it to clipboard.",
-
   "commands.openstarbound.swap": "Swap current character.",
   "commands.openstarbound.identity": "Manages identity settings.",
   "commands.openstarbound.identity.set": "Sets identity attributes.",
@@ -139,6 +131,7 @@
   "commands.openstarbound.render": "Renders various parts of the character and saves it in the storage folder.",
 
   "commands.starcustomchat.clearchat": "Clears the chat history.",
+  "commands.starcustomchat.filter": "Filter the messages by substring. Send empty to disable filtering.",
 
   "commands.custom.hotreload": "Reloads the configuration."
 }

@@ -1,13 +1,36 @@
 -- base.lua
 
 PluginClass = {
-  name = ""
+  name = "",
+  styleResolvingCallbacks = {
+    formatIncomingMessage = true,
+    formatOutcomingMessage = true,
+    editMessage = true
+  }
 }
 
 function PluginClass:new(obj)
     local obj = obj or {}
     setmetatable(obj, self)
     self.__index = self
+
+    if not obj.name or obj.name == "" then
+      error("SCC: Plugin with the empty name is being registered")
+      return
+    end
+
+    obj.getRootValue = function(...)
+      return Configuration:getRootValue(obj.name, ...)
+    end
+    obj.getPlayerValue = function(...)
+      return Configuration:getPlayerValue(obj.name, ...)
+    end
+    obj.setRootValue = function(...)
+      return Configuration:setRootValue(obj.name, ...)
+    end
+    obj.setPlayerValue = function(...)
+      return Configuration:setPlayerValue(obj.name, ...)
+    end
     return obj
 end
 
@@ -33,7 +56,30 @@ function PluginClass:_requestStagehandHandlers()
   end
 end
 
+function PluginClass:_requestCommands()
+  if self.stagehandType and self.stagehandType ~= "" then
+    starcustomchat.utils.runWhenPlayerReady(function()
+      starcustomchat.utils.createStagehandWithData(self.stagehandType, {message = "requestCommands", data = {playerId = player.id()}})
+    end)
+  end
+end
+
+function PluginClass:runCallbacks(plugins, method, ...)
+  local result = nil
+  for _, plugin in ipairs(plugins) do
+    result = plugin[method](plugin, ...) or result
+  end
+  if self.styleResolvingCallbacks[method] then
+    result = starcustomchat.utils.resolveStyleStack(result)
+  end
+  return result
+end
+
 function PluginClass:update(dt)
+
+end
+
+function PluginClass:processEvents(events)
 
 end
 
@@ -55,6 +101,10 @@ end
 
 function PluginClass:addCustomCommandPreview(availableCommands, substr)
 
+end
+
+function PluginClass:resolvePlayerData(playerData)
+  return playerData
 end
 
 function PluginClass:onSendMessage(message)
@@ -103,7 +153,23 @@ function PluginClass:formatOutcomingMessage(message)
   return message
 end
 
-function PluginClass:onDrawMessage(message)
+function PluginClass:editMessage(message)
+  return self:formatIncomingMessage(message)
+end
+
+--[[
+  Called after the base text/image height is known but before the message is
+  drawn. Plugins may reserve space by mutating drawData:
+    bodyOffset: shifts the base text/image down
+    bodyHeight: height before the avatar and bottom decorations
+    height: final message height
+]]
+function PluginClass:onMeasureMessage(message, drawData)
+
+end
+
+-- Called for visible messages after their final offset and height are known.
+function PluginClass:onDrawMessage(message, drawData)
 
 end
 
@@ -127,11 +193,15 @@ function PluginClass:onProcessCommand(text)
   return false
 end
 
-function PluginClass:onBackgroundChange(chatConfig)
-  return chatConfig
+function PluginClass:onCustomButtonClick(buttonName, data)
+
 end
 
-function PluginClass:onCustomButtonClick(buttonName, data)
+function PluginClass:onCustomButtonClick2(buttonName, data)
+
+end
+
+function PluginClass:onCustomButtonClick3(buttonName, data)
 
 end
 
@@ -149,6 +219,10 @@ end
 
 function PluginClass:cleanMessage(message)
 
+end
+
+function PluginClass:showDots()
+  return false
 end
 
 function PluginClass:uninit()

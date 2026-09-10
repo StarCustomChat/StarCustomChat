@@ -1,6 +1,5 @@
 {
     "chat.commands.add_reaction": "Додати реакцію",
-    "reactions.reactselect.hint": "Пошук...",
     "reactions.reactselect.all": "Усі",
     "reactions.reactselect.recent": "Нещодавні"
 }

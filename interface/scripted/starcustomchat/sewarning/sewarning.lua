@@ -15,7 +15,7 @@ function populateLanguagesList()
   local selectedLocale = "en"
 
   for locale, localeConfig in pairs(self.localeConfigs) do 
-    local flagImage = "/interface/scripted/starcustomchatsettings/flags/" .. locale .. ".png"
+    local flagImage = "/interface/scripted/starcustomchatsettings/images/flags/" .. locale .. ".png"
     local li = widget.addListItem("lytSelectLanguage.saLanguages.listLanguages")
 
     if li then
@@ -47,8 +47,8 @@ function setLanguage()
     self.selectedLocale = data.lang
     setTexts()
     widget.setButtonImages("btnLanguage", {
-      base = "/interface/scripted/starcustomchatsettings/flags/" .. data.lang .. ".png?border=1;000F",
-      hover = "/interface/scripted/starcustomchatsettings/flags/" .. data.lang .. ".png?brightness=90?border=1;000F"
+      base = "/interface/scripted/starcustomchatsettings/images/flags/" .. data.lang .. ".png?border=1;000F",
+      hover = "/interface/scripted/starcustomchatsettings/images/flags/" .. data.lang .. ".png?brightness=90?border=1;000F"
     })
     widget.setVisible("lytSelectLanguage", false)
   end

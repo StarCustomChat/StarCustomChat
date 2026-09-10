@@ -5,27 +5,17 @@ voicechat = PluginClass:new(
 )
 
 function voicechat:init()
-  self.isOpenSB = root.assetOrigin and root.assetOrigin("/opensb/coconut.png")
-  self.isOSBXSB = self.isOpenSB or xsb
-  
-  self:_loadConfig()
   local isEnabled = root.getConfiguration("scc_voice_enabled") or false
-  widget.setChecked("btnCkVoice", isEnabled)
+  widget.setChecked("lytModeFilter.btnCkVoice", isEnabled)
 
   self:setEnabled(isEnabled)
 end
 
 function voicechat:setEnabled(enabled)
   -- Avoid audio stutters by checking and setting voice settings efficiently
-  if self.isOSBXSB then
-    local voiceSettings = voice.getSettings()
-    voiceSettings["enabled"] = enabled
-    voice.mergeSettings(voiceSettings)
-  else
-    if voice.enabled() ~= enabled then
-      voice.setEnabled(enabled)
-    end
-  end
+  local voiceSettings = voice.getSettings()
+  voiceSettings["enabled"] = enabled
+  voice.mergeSettings(voiceSettings)
 end
 
 

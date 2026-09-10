@@ -1,0 +1,71 @@
+{
+  "name": "Typing",
+
+  "parameters": {
+      "dotsSpeed": 0.5,
+      "typingResendInterval": 3,
+      "playerRadius": 35,
+      "overlayImage": "/interface/scripted/starcustomchat/plugins/typing/images/overlay.png",
+      "overlayImageFrames": 3
+  },
+
+  "settingsPage": {
+    "tabButtons": {
+      "baseImage": "/interface/scripted/starcustomchat/plugins/typing/settingstabs/tab.png:base",
+      "hoverImage": "/interface/scripted/starcustomchat/plugins/typing/settingstabs/tab.png:hover",
+      "baseImageChecked": "/interface/scripted/starcustomchat/plugins/typing/settingstabs/tab.png:selected",
+      "hoverImageChecked": "/interface/scripted/starcustomchat/plugins/typing/settingstabs/tab.png:selectedhover"
+    },
+    "gui": {
+      "titleText": {
+        "type": "label",
+        "position": [12, 130],
+        "fontSize": 12,
+        "hAnchor": "left",
+        "value": "",
+        "translationKey": "settings.plugins.typing"
+      },
+
+      "lblTypingStatus": {
+        "type": "label",
+        "position": [170, 100],
+        "hAnchor": "right",
+        "vAnchor": "top",
+        "translationKey": "settings.plugins.typing.status_message"
+      },
+      "chkTypingStatus": {
+        "type": "button",
+        "position": [180, 92],
+        "checkable": true,
+        "checked": false,
+        "base": "/interface/crafting/checkboxnocheck.png",
+        "hover": "/interface/crafting/checkboxnocheck.png",
+        "baseImageChecked": "/interface/crafting/checkboxcheck.png",
+        "hoverImageChecked": "/interface/crafting/checkboxcheck.png",
+        "callback": "setStatusEnabled"
+      },
+
+      "lblPlayerPortraits": {
+        "type": "label",
+        "position": [170, 80],
+        "hAnchor": "right",
+        "vAnchor": "top",
+        "translationKey": "settings.plugins.typing.player_portraits"
+      },
+      "chkPlayerPortraits": {
+        "type": "button",
+        "position": [180, 72],
+        "checkable": true,
+        "checked": false,
+        "base": "/interface/crafting/checkboxnocheck.png",
+        "hover": "/interface/crafting/checkboxnocheck.png",
+        "baseImageChecked": "/interface/crafting/checkboxcheck.png",
+        "hoverImageChecked": "/interface/crafting/checkboxcheck.png",
+        "callback": "setPortraitDotsEnabled"
+      }
+    }
+  },
+
+  "script": "/interface/scripted/starcustomchat/plugins/typing/typing.lua",
+  "settingsScript": "/interface/scripted/starcustomchat/plugins/typing/typingsettings.lua"
+}

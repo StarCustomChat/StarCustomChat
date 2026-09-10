@@ -95,7 +95,11 @@ function DMTab:populateList(dmingTo)
     for _, player in ipairs(starcustomchat.utils.playersInRadius(40)) do
       table.insert(playersAround, {
         id = player,
-        name = world.entityName(player) or "Unknown",
+        name = self.customChat.callbackPlugins("resolvePlayerData", {
+          name = world.entityName(player),
+          entityId = player,
+          uuid = world.entityUniqueId(player)
+        }).name or "Unknown",
         data = {
           portrait = world.entityPortrait(player, "full")
         }
@@ -108,7 +112,7 @@ end
 
 function DMTab:selectPlayer(...)
   if not self.ignoreSettingList then
-    widget.focus("tbxInput")
+    self.customChat:focusInput()
   end
 
   self.ignoreSettingList = nil
@@ -121,11 +125,12 @@ function DMTab:drawIcon(canvasName, args)
   if type(args) == "number" then
     local playerPortrait = world.entityPortrait(args, "full")
     for _, layer in ipairs(playerPortrait) do
-      playerCanvas:drawImage(layer.image, {-14, -18})
+      playerCanvas:drawImage(layer.image, {7, 2}, 1, nil, true)
     end
   elseif type(args) == "table" then
     for _, layer in ipairs(args) do
-      playerCanvas:drawImage(layer.image, {-14, -18})
+      local size = starcustomchat.utils.safeImageSize(layer.image)
+      playerCanvas:drawImage(layer.image, {7, 2}, 1, nil, true)
     end
   elseif type(args) == "string" and utf8.len(args) == 2 then
     playerCanvas:drawText(args, {

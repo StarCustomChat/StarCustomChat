@@ -1,0 +1,9 @@
+{
+    "chat.typing.typing_one": "%s schreibt",
+    "chat.typing.typing_few": "%s und %s schreiben",
+    "chat.typing.typing_multiple": "Mehrere Personen schreiben",
+
+    "settings.plugins.typing": "Tippanzeigen",
+    "settings.plugins.typing.player_portraits": "Portrait-Tippanzeigen\n^gray;(nur im modernen Modus)",
+    "settings.plugins.typing.status_message": "Tippstatus-Nachricht"
+}

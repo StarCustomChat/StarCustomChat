@@ -3,6 +3,7 @@
     "settings.plugins.charactervoice.enable": "Включить",
     "settings.plugins.charactervoice.enablewhisper": "Голос при ЛС",
     "settings.plugins.charactervoice.pitch": "Тон",
+    "settings.plugins.charactervoice.volume": "Громкость",
     "settings.plugins.charactervoice.test": "Тест",
     "settings.plugins.charactervoice.description": "При отправке сообщения проигрывает выбранный звук разговора",
     "settings.plugins.charactervoice.wisperDescription": "При отправке ЛС проигрывает выбранный звук разговора",

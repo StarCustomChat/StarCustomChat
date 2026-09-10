@@ -1,0 +1,9 @@
+{
+    "chat.typing.typing_one": "%s is aan het typen",
+    "chat.typing.typing_few": "%s en %s zijn aan het typen",
+    "chat.typing.typing_multiple": "Meerdere personen zijn aan het typen",
+
+    "settings.plugins.typing": "Typindicatie",
+    "settings.plugins.typing.player_portraits": "Typindicators op Portretten\n^gray;(enkel in Moderne modus)",
+    "settings.plugins.typing.status_message": "Typstatusbericht"
+}

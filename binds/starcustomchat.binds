@@ -12,6 +12,14 @@
       },
       "enableAfk": {
         "name": "Toggle AFK mode"
+      },
+      "openEmojiPane": {
+        "default": [{
+          "type": "key",
+          "value": "E",
+          "mods": ["LCtrl"]
+        }],
+        "name": "Open Emoji Pane"
       }
     }
   }

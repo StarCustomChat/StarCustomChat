@@ -1,0 +1,13 @@
+{
+    "settings.afk_mode": "AFK",
+    "chat.buttons.afk_mode": "Уключыць AFK-рэжым",
+    "settings.afk_min": "мін",
+    "settings.plugins.afk": "Налады AFK",
+    "settings.afk_description": "Значэнне 0 адключае AFK-плагін",
+    "settings.afk_effects": "Эфект AFK:",
+    "settings.afk_modes.plain": "Просты",
+    "settings.afk_modes.lines": "Лініі",
+    "settings.colors.afkcolor": "AFK",
+    "settings.plugins.afk.button_disabled": "Схаваць кнопку AFK",
+    "settings.plugins.afk.ignore_mouse": "Ігнараваць рух мышы ў AFK-рэжыме"
+  }

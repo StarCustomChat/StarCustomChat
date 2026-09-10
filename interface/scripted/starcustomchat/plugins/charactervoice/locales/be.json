@@ -1,0 +1,14 @@
+{
+    "settings.plugins.charactervoice": "Голас персанажа",
+    "settings.plugins.charactervoice.enable": "Уключана",
+    "settings.plugins.charactervoice.enablewhisper": "Гаворка ў ЛС",
+    "settings.plugins.charactervoice.pitch": "Вышыня тону",
+    "settings.plugins.charactervoice.volume": "Гучнасць",
+    "settings.plugins.charactervoice.test": "Праверыць",
+    "settings.plugins.charactervoice.description": "Пры адпраўцы паведамлення прайграе выбраны гук гаворкі",
+    "settings.plugins.charactervoice.wisperDescription": "Пры адпраўцы асабістага паведамлення прайграе выбраны гук гаворкі",
+    "settings.plugins.charactervoice.customItem": "^green;Карыстальніцкі",
+    "settings.plugins.charactervoice.customSoundHint": "увядзіце/шлях/да/вашага_гуку.ogg",
+    "settings.plugins.charactervoice.save": "Захаваць",
+    "settings.plugins.charactervoice.soundNotFound": "^red;Гук не знойдзен"
+}

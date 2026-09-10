@@ -7,25 +7,33 @@ fonts = SettingsPluginClass:new(
 
 -- Settings
 function fonts:init(chat)
-  self:_loadConfig()
   self.chat = chat
 
   self.currentFonts = root.getConfiguration("scc_custom_fonts") or {}
+  self.combobox = self:createCombobox()
 end
 
 function fonts:isAvailable()
   return root.assetsByExtension
 end
 
-function fonts:openTab()
-  self.combobox = Combobox:bind(self.layoutWidget .. "." .. "btnSelectFont", config.getParameter("allFontsTable"), function(data)
+function fonts:createCombobox()
+  return Combobox:bind(self.layoutWidget .. "." .. "btnSelectFont", config.getParameter("allFontsTable"), function(data)
     self:selectedCombobox(data)
   end, {
     filter = true,
-    size = root.imageSize("/interface/scripted/combobox/background.png"),
-    offset = {0, 10},
-    closeOnSelect = true
+    background = "/interface/scripted/starcustomchatsettings/images/combobox/backgroundFilter.png",
+    listSchema = {
+      listSelected = "/interface/scripted/starcustomchatsettings/images/combobox/listselected.png",
+      listUnselected = "/interface/scripted/starcustomchatsettings/images/combobox/listunselected.png"
+    },
+    offset = {0, 15},
+    closeOnSelect = true,
+    sortKeys = true
   })
+end
+
+function fonts:openTab()
   self:populateList()
 end
 
@@ -66,7 +74,10 @@ function fonts:changedFontItem()
     self.widget.setVisible("btnDropToDefault", true)
     self.widget.setVisible("btnSelectFont", true)
   end
+end
 
+function fonts:openCombobox()
+  self.combobox:toggle()
 end
 
 function fonts:dropToDefault()
@@ -74,10 +85,11 @@ function fonts:dropToDefault()
 end
 
 function fonts:selectedCombobox(newFont)
-  self.widget.setText("btnSelectFont", newFont or "hobo")
+  newFont = newFont or "hobo"
+  self.widget.setText("btnSelectFont", newFont)
 
   if self.currentListItem then
-    self.widget.setText("saScrollArea.listItems." .. self.currentListItem .. ".name", string.format("^font=%s;%s", newFont or "hobo", starcustomchat.utils.getTranslation(self.currentLabel)))
+    self.widget.setText("saScrollArea.listItems." .. self.currentListItem .. ".name", string.format("^font=%s;%s", newFont, starcustomchat.utils.getTranslation(self.currentLabel)))
     self.widget.setData("saScrollArea.listItems." .. self.currentListItem, {
       name = self.currentItemName,
       font = font,
@@ -91,5 +103,5 @@ function fonts:selectedCombobox(newFont)
 end
 
 function fonts:uninit()
-
+  self.combobox:destroy()
 end

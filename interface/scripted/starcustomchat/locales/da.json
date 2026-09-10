@@ -7,14 +7,16 @@
   "chat.modes.Whisper": "Privé",
   "chat.modes.RadioMessage": "Radiobericht",
   "chat.modes.CommandResult": "Commandoresultaat",
+  "chat.message.edited": "bewerkt",
 
   "chat.textbox.hint": "Typ hier",
+  "chat.textbox.hint.filter": "Filtrering af beskeder (\"%s\")",
 
   "chat.buttons.bottom": "Naar beneden",
   "chat.buttons.settings": "Instellingen",
   "chat.buttons.hide": "Verberg chat",
-  "chat.buttons.bigger_chat": "Grotere chat",
   "chat.buttons.move_chat": "Verplaats chat",
+  "chat.buttons.resize_chat": "Chatgrootte aanpassen",
 
   "chat.alerts.dm_not_specified": "Selecteer de ontvanger",
   "chat.alerts.dm_not_found": "De speler moet op dezelfde planeet zijn.", 
@@ -47,7 +49,11 @@
   "settings.back": "Terug",
   "settings.add": "Toevoegen",
   "settings.remove": "Verwijderen",
+  "settings.search": "Zoeken...",
 
+
+  "chat.commands.unknown_argument": "Onbekend argument: %s",
+  "chat.commands.unknown_argument_expected": "Onbekend argument: %s, toegestaan zijn %s",
 
 
   "commands.general.admin": "Schakelt adminmodus in of uit, dit geeft toegang tot alle craftingrecepten, voorkomt schade of energieverlies, en laat je admin-exclusieve commandos gebruiken.",
@@ -118,19 +124,6 @@
   "commands.debug.togglelayer": "Schakelt een laag in of uit.",
   "commands.debug.upgradeship": "Upgradet jouw ruimteschip.",
 
-  "commands.starextentions.binds": "Geeft alle sneltoetsen weer.",
-  "commands.starextentions.breathing": "Schakelt ademhaling in of uit.",
-  "commands.starextentions.guide": "Geeft StarExtensions' gids weer.",
-  "commands.starextentions.voice": "Schakelt voicechat in of uit.",
-  "commands.starextentions.swap": "Wisselt jouw karakter om.",
-  "commands.starextentions.editor": "Opent de karaktereditor.",
-  "commands.starextentions.identity": "Beheert identiteitsinstellingen.",
-  "commands.starextentions.identity.set": "Stelt identiteitsattributen in.",
-  "commands.starextentions.identity.get": "Geeft identiteitsattributen weer.",
-  "commands.starextentions.speech": "Schakelt text-to-speech in of uit.",
-  "commands.starextentions.nightvision": "Schakelt nachtvisie in of uit.",
-  "commands.starextentions.render": "Geeft een afbeelding van verscheidene onderdelen van jouw karakter, en kopieert die naar het klipbord.",
-
   "commands.openstarbound.swap": "Wisselt jouw karakter om.",
   "commands.openstarbound.identity": "Beheert identiteitsinstellingen.",
   "commands.openstarbound.identity.set": "Stelt identiteitsattributen in.",
@@ -138,6 +131,7 @@
   "commands.openstarbound.render": "Geeft een afbeelding van verscheidene onderdelen van jouw karakter, en slaat die op in de storage folder.",
 
   "commands.starcustomchat.clearchat": "Wist de chatgeschiedenis.",
+  "commands.starcustomchat.filter": "Filter berichten op substring. Laat leeg om filteren uit te schakelen.",
 
   "commands.custom.hotreload": "Herlaadt configuraties."
 }

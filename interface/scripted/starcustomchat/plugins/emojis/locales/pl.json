@@ -1,0 +1,12 @@
+{
+  "chat.buttons.emojis": "Emoji",
+
+  "chat.emojis.groups.people": "Ludzie",
+  "chat.emojis.groups.emotions": "Emocje",
+  "chat.emojis.groups.nature": "Natura",
+  "chat.emojis.groups.food": "Jedzenie",
+  "chat.emojis.groups.travel": "Podróże",
+  "chat.emojis.groups.activities": "Aktywności",
+  "chat.emojis.groups.objects": "Rzeczy",
+  "chat.emojis.groups.symbols": "Symbole"
+}

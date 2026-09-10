@@ -119,16 +119,16 @@ function buildChatInterface()
   end
 
   local totalNModes = modesThatHaveTabs(chatModes)
-  local tabWidth = safeImageSize(string.format("/interface/scripted/starcustomchat/base/tabmodes/chatmode%d.png", totalNModes))[1]
+  local tabWidth = safeImageSize("/interface/scripted/starcustomchat/base/images/tabmodes/chatmode.png")[1]
 
   for _, mode in ipairs(chatModes) do
     if mode.has_tab then
       table.insert(baseInterface["gui"]["rgChatMode"]["buttons"], {
         id = tab_id,
-        baseImage = string.format("/interface/scripted/starcustomchat/base/tabmodes/chatmode%d.png", totalNModes),
-        hoverImage = string.format("/interface/scripted/starcustomchat/base/tabmodes/chatmode%d.png?brightness=30", totalNModes),
-        baseImageChecked = string.format("/interface/scripted/starcustomchat/base/tabmodes/chatmode%dselected.png", totalNModes),
-        hoverImageChecked = string.format("/interface/scripted/starcustomchat/base/tabmodes/chatmode%dselected.png?brightness=30", totalNModes),
+        baseImage = "/interface/scripted/starcustomchat/base/images/tabmodes/chatmode.png",
+        hoverImage = "/interface/scripted/starcustomchat/base/images/tabmodes/chatmode.png?brightness=30",
+        baseImageChecked = "/interface/scripted/starcustomchat/base/images/tabmodes/chatmodeselected.png",
+        hoverImageChecked = "/interface/scripted/starcustomchat/base/images/tabmodes/chatmodeselected.png?brightness=30",
         pressedOffset = {0, 0},
         position = {(tab_id - 1) * tabWidth, 0},
         selected = tab_id == 1,
@@ -147,16 +147,16 @@ function buildChatInterface()
       end
 
     
-      baseInterface["gui"]["btnCk" .. mode.name] = {
+      baseInterface["gui"]["lytModeFilter"]["children"]["btnCk" .. mode.name] = {
         type = "button",
         checkable = true,
         checked = checked,
-        position = {289, 11 + 15 * (toggle_id - 1)},
+        position = {0, 15 * (toggle_id - 1)},
         pressedOffset = {0, 0},
-        base = "/interface/scripted/starcustomchat/base/chatmodedisabled.png",
-        hover = "/interface/scripted/starcustomchat/base/chatmodedisabled.png",
-        baseImageChecked = "/interface/scripted/starcustomchat/base/chatmodeenabled.png",
-        hoverImageChecked = "/interface/scripted/starcustomchat/base/chatmodeenabled.png",
+        base = "/interface/scripted/starcustomchat/base/images/chatmode/chatmode.png:disabled",
+        hover = "/interface/scripted/starcustomchat/base/images/chatmode/chatmode.png:disabled",
+        baseImageChecked = "/interface/scripted/starcustomchat/base/images/chatmode/chatmode.png:enabled",
+        hoverImageChecked = "/interface/scripted/starcustomchat/base/images/chatmode/chatmode.png:enabled",
         callback = "modeToggle",
         data = {
           mode = mode.name,
@@ -165,13 +165,9 @@ function buildChatInterface()
       }
       toggle_id = toggle_id + 1
     end
+
+    baseInterface["gui"]["lytModeFilter"].size = {16, 16 * toggle_id}
   end
-
-  baseInterface.expanded = getConfiguration("icc_is_expanded")
-
-  
-
-  baseInterface["gui"]["background"]["fileBody"] = string.format("/interface/scripted/starcustomchat/base/%s.png", baseInterface.expanded and "body" or "shortbody")
   return baseInterface
 end
 

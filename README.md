@@ -18,14 +18,14 @@ Custom chat provides you with several in-built functions like these:
 ![Full avatar mode](https://i.imgur.com/yLO8qWg.png)
 ![Short mode with disabled commands showcase](https://i.imgur.com/oXtXDp7.png)
 # Prerequirements
-This mod requires [StarExtensions](https://github.com/StarExtensions/StarExtensions) v.1.9.24+ by Kae, [OpenStarbound](https://github.com/OpenStarbound/OpenStarbound) 0.1.8+ or [xStarbound](https://github.com/xStarbound/xStarbound) v3.5.2.1+ by FezzedOne.
+This mod requires [OpenStarbound](https://github.com/OpenStarbound/OpenStarbound) 0.1.8+.
 
 # Controls
 
  - **Mousewheel**: scroll chat up / down
  - **Ctrl** + **Mousewheel**: change font size
  - **Shift** + **Mousewheel**: scroll up / down twice as fast
- - **Shift** + **Up**/**Down**: scroll through last sent messages
+ - **Alt** + **Up**/**Down**: scroll through last sent messages
  - **P** (default, change in /binds): repeat last command
 
 # Plugins
@@ -102,7 +102,23 @@ In order for the plugins to understand that this stagehand supports their messag
 if purpose == "requestHandlers" then
   if data and data.playerId then
     world.sendEntityMessage(data.playerId, "scc_stagehand_allowed_messages", {"here", "is", "a", "list", "of", "supported", "messages"})
-  stagehand.die()
+    stagehand.die()
+  end
+end
+```
+
+Since SCC 2.0.0, the servers can also pass the command list in the format of `commands.config` to the client. For that, the stagehand parameter should be described in the plugin (see above).
+
+```lua
+if purpose == "requestCommands" then
+  if data and data.playerId and world.entityExists(data.playerId) then
+    world.sendEntityMessage(data.playerId, "scc_stagehand_commandlist", {
+      { command = "/myNewCommand", description = "New server command" },
+      { command = "/compoundCommand", description = "Main command", subcommands = {
+        option1, option2
+      } }
+    }, "MyNewPlugin") -- The name of the plugin is optional.
+    stagehand.die()
   end
 end
 ```
@@ -144,6 +160,7 @@ If you don't want to create a whole plugin just to bring some commands to the pr
 * @muro_o - Portuguese (Brazilian)
 * @ifanel - Ukrainian
 * @fragcunt - Polish
+* @storyshifty - Belarus
 
 # Contact me
 If you have bug reports, suggestions or other ideas, you can contact me on Discord (@Degranon) or join [my Discord server](https://discord.gg/gnu8xRjS9p)

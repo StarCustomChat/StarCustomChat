@@ -7,22 +7,29 @@ modesounds = SettingsPluginClass:new(
 
 -- Settings
 function modesounds:init()
-  self:_loadConfig()
-
   self.modeSoundTable = root.getConfiguration("scc_mode_sounds") or {}
 end
 
 function modesounds:openTab()
   self.soundList = {}
+  self.soundListItems = {}
 
-  for _, sound in ipairs(self.sounds) do
+  local sounds = root.assetsByExtension(".ogg")
+
+  table.sort(sounds)
+
+  for _, sound in ipairs(sounds) do
     local name = sound:match("(/[^/]+/[^/]+)$") or sound
     table.insert(self.soundList, {
-      name = name,
-      data = sound
+      name = name:match("([^/]+)$"),
+      data = {
+        sound = sound,
+        displayPlainText = name 
+      }
     })
   end
 
+  self:populateScrollArea("saSounds", self.soundList, nil)
   self:populateModesScrollArea()
 end
 
@@ -49,40 +56,73 @@ function modesounds:onLocaleChange()
   self:populateScrollArea("saSounds", self.soundList)
 end
 
+function modesounds:stopSounds()
+  if self.modeSoundTable[self.selectedMode] then 
+    pane.stopAllSounds(self.modeSoundTable[self.selectedMode])
+  end
+end
+
 function modesounds:changeMode()
+  self:stopSounds()
+
+  self.widget.setVisible("saSounds", true)
+  self.widget.setVisible("tbxFilter", true)
+
   self.selectedModeListItem = self.widget.getListSelected("saModes.listItems")
   if self.selectedModeListItem then
     self.selectedMode = self.widget.getData("saModes.listItems." .. self.selectedModeListItem)
   end
 
-
   self.widget.setVisible("btnClear", true)
   self.widget.setButtonEnabled("btnClear", false)
-  self:populateScrollArea("saSounds", self.soundList, self.modeSoundTable[self.selectedMode])
-end
-
-function modesounds:populateScrollArea(scrollArea, items, selectedItem, callback)
-  self.widget.clearListItems(scrollArea .. ".listItems")
-
-  for _, item in ipairs(items or {}) do
-    local li = self.widget.addListItem(scrollArea .. ".listItems")
-    self.widget.setText(scrollArea .. ".listItems" .. "." .. li .. ".name", item.name)
-    self.widget.setData(scrollArea .. ".listItems" .. "." .. li, item.data)
-    if selectedItem and item.data == selectedItem then
-      self.widget.setListSelected(scrollArea .. ".listItems", li)
-      self.widget.setButtonEnabled("btnClear", true)
-    end
-
-    if callback then
-      callback(item.name, item.data, li)
+  
+  -- Update selected sound without refilling the list
+  local selectedSound = self.modeSoundTable[self.selectedMode]
+  if selectedSound and self.soundListItems[selectedSound] then
+    self.widget.setListSelected("saSounds.listItems", self.soundListItems[selectedSound])
+    self.widget.setButtonEnabled("btnClear", true)
+  else
+    if widget.clearListSelected then
+      self.widget.clearListSelected("saSounds.listItems")
     end
   end
 end
 
+function modesounds:populateScrollArea(scrollArea, items, selectedItem, callback, filter)
+  self.widget.clearListItems(scrollArea .. ".listItems")
+
+  for _, item in ipairs(items or {}) do
+    if not filter or string.find(item.name, filter) then
+      local li = self.widget.addListItem(scrollArea .. ".listItems")
+      self.widget.setText(scrollArea .. ".listItems" .. "." .. li .. ".name", item.name)
+      self.widget.setData(scrollArea .. ".listItems" .. "." .. li, item.data)
+      
+      -- Store li for sounds to avoid refilling the list later
+      if scrollArea == "saSounds" then
+        self.soundListItems[item.data] = li
+      end
+      
+      if selectedItem and item.data == selectedItem then
+        self.widget.setListSelected(scrollArea .. ".listItems", li)
+        self.widget.setButtonEnabled("btnClear", true)
+      end
+
+      if callback then
+        callback(item.name, item.data, li)
+      end
+    end
+  end
+end
+
+function modesounds:searchSound()
+  self:populateScrollArea("saSounds", self.soundList, self.modeSoundTable[self.selectedMode], nil, self.widget.getText("tbxFilter"))
+end
+
 function modesounds:setModeSound()
+  self:stopSounds()
   local li = self.widget.getListSelected("saSounds.listItems")
   if li then
-    local sound = self.widget.getData("saSounds.listItems." .. li)
+    local sound = self.widget.getData("saSounds.listItems." .. li).sound
     if sound then
       pane.playSound(sound)
       self.modeSoundTable[self.selectedMode] = sound
@@ -102,6 +142,7 @@ function modesounds:setModeSound()
 end
 
 function modesounds:clearModeSound()
+  self:stopSounds()
   if self.selectedMode then
     self.widget.setButtonEnabled("btnClear", false)
     self.modeSoundTable[self.selectedMode] = nil
@@ -110,12 +151,10 @@ function modesounds:clearModeSound()
     end
     root.setConfiguration("scc_mode_sounds", self.modeSoundTable)
     save()
-    self:populateScrollArea("saSounds", self.soundList, nil)
+    self.widget.setListSelected("saSounds.listItems", 0)
   end
 end
 
 function modesounds:uninit()
-  if self.modeSoundTable[self.selectedMode] then
-    pane.stopAllSounds(self.modeSoundTable[self.selectedMode])
-  end
+  self:stopSounds()
 end

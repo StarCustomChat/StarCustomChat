@@ -1,14 +1,14 @@
 require "/scripts/vec2.lua"
 require "/scripts/util.lua"
 require "/scripts/messageutil.lua"
+require "/scripts/scctimer.lua"
 require "/interface/scripted/starcustomchat/base/starcustomchatutils.lua"
-require "/interface/scripted/combobox/combobox.class.lua"
+require "/interface/StarboundTextboxInterface/combobox/scripts/combobox.lua"
+require "/interface/StarboundTextboxInterface/scripts/utf8/utf8.lua"
+require "/interface/scripted/starcustomchat/base/utils/config.lua"
 
 function init()
-
-  self.isOpenSB = root.assetOrigin and root.assetOrigin("/opensb/coconut.png")
-  self.isOSBXSB = self.isOpenSB or xsb
-  
+  Configuration = __Config:init()
   self.translations = config.getParameter("translations", jarray())
   self.hintTranslations = config.getParameter("hintTranslations", jarray())
   self.chatConfig = config.getParameter("chatConfig")
@@ -62,7 +62,6 @@ function init()
     end
 
     sb.logError("Plugin %s does not exist", pluginName)
-
     return
   end
 
@@ -115,7 +114,7 @@ function init()
   end
 
   self.localization = config.getParameter("localizationTable")
-
+  starcustomchat.utils.buildLocale(self.localization)
   self.runCallbackForPlugins("init", self.localization)
   populateLanguagesList()
 
@@ -129,8 +128,8 @@ function localeSettings()
   starcustomchat.utils.buildLocale(self.localization)
   local selectedLocale = root.getConfiguration("scclocale") or "en"
   widget.setButtonImages("btnLanguage", {
-    base = "/interface/scripted/starcustomchatsettings/flags/" .. selectedLocale .. ".png?border=1;000F",
-    hover = "/interface/scripted/starcustomchatsettings/flags/" .. selectedLocale .. ".png?brightness=90?border=1;000F"
+    base = "/interface/scripted/starcustomchatsettings/images/flags/" .. selectedLocale .. ".png?border=1;000F",
+    hover = "/interface/scripted/starcustomchatsettings/images/flags/" .. selectedLocale .. ".png?brightness=90?border=1;000F"
   })
   
   local version = starcustomchat.utils.getVersion()
@@ -156,7 +155,7 @@ function populateLanguagesList()
 
   for _, localeConfig in ipairs(self.availableLocales) do 
     local locale = localeConfig.code
-    local flagImage = "/interface/scripted/starcustomchatsettings/flags/" .. locale .. ".png"
+    local flagImage = "/interface/scripted/starcustomchatsettings/images/flags/" .. locale .. ".png"
     local li = widget.addListItem("lytSelectLanguage.saLanguages.listLanguages")
 
     if li then
@@ -212,6 +211,7 @@ end
 
 function update(dt)
   promises:update()
+  timers:update(dt)
   processPluginsSAButtons()
   self.runCallbackForPlugins("update", dt)
 end
@@ -289,14 +289,6 @@ function scrollPluginsSADown()
   end
 end
 
--- Utility function: return the index of a value in the given array
-  function index(tab, value)
-    for k, v in ipairs(tab) do
-      if v == value then return k end
-    end
-    return 0
-  end
-
 function createTooltip(screenPosition)
   if self.tooltipFields then
     for widgetName, tooltip in pairs(self.tooltipFields) do
@@ -325,3 +317,6 @@ function uninit()
   self.runCallbackForPlugins("uninit")
   save()
 end
+
+-- Required to be at the very bottom
+require("/interface/StarboundTextboxInterface/textarea/scripts/textbox.lua")

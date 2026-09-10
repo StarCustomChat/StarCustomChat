@@ -3,6 +3,7 @@
     "settings.plugins.charactervoice.enable": "Enabled",
     "settings.plugins.charactervoice.enablewhisper": "DM speaking",
     "settings.plugins.charactervoice.pitch": "Pitch",
+    "settings.plugins.charactervoice.volume": "Volume",
     "settings.plugins.charactervoice.test": "Test",
     "settings.plugins.charactervoice.description": "At message sending plays a selected talking sound",
     "settings.plugins.charactervoice.wisperDescription": "At whisper message sending plays a selected talking sound",

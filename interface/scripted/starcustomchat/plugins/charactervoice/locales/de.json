@@ -3,6 +3,7 @@
     "settings.plugins.charactervoice.enable": "Aktiviert",
     "settings.plugins.charactervoice.enablewhisper": "Privatchat",
     "settings.plugins.charactervoice.pitch": "Tonhöhe",
+    "settings.plugins.charactervoice.volume": "Lautstärke",
     "settings.plugins.charactervoice.test": "Test",
     "settings.plugins.charactervoice.description": "Spielt ausgewählten Ton bei Senden von Nachricht ab",
     "settings.plugins.charactervoice.wisperDescription": "Spielt beim Flüstern ausgewählten Ton ab",

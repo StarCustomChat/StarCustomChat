@@ -1,0 +1,103 @@
+{
+    "name": "Emojis",
+
+    "parameters": {
+      "addSpaceAfterEmoji": true
+    },
+    "leftMenuButtons": [
+      {
+        "name": "btnEmojiList",
+        "base": "/interface/scripted/starcustomchat/plugins/emojis/interface/emojis.png:base",
+        "hover": "/interface/scripted/starcustomchat/plugins/emojis/interface/emojis.png:hover",
+        "callback": "customButtonCallback",
+        "data": {
+          "displayText": "chat.buttons.emojis"
+        }
+      }
+    ],
+
+    "guiAddons": {
+      "lytEmojiList": {
+        "type": "layout",
+        "layoutType": "basic",
+        "visible": false,
+        "zlevel": 120,
+        "position": [23, 28],
+        "size": [200, 80],
+        "children": {
+          "background": {
+              "type": "image",
+              "file": "/interface/scripted/starcustomchat/plugins/emojis/interface/body.png"
+          },
+
+          "saGroups": {
+              "type": "scrollArea",
+              "rect": [2, 10, 22, 78],
+              "zlevel": 4,
+              "buttons" : {
+                  "horizontal" : {
+                    "forward" : { "base" : "/assetmissing.png", "hover" : "/assetmissing.png", "pressed" : "/assetmissing.png" },
+                    "backward" : { "base" : "/assetmissing.png", "hover" : "/assetmissing.png", "pressed" : "/assetmissing.png" }
+                  },
+                  "vertical" : {
+                    "forward" : { "base" : "/assetmissing.png", "hover" : "/assetmissing.png", "pressed" : "/assetmissing.png" },
+                    "backward" : { "base" : "/assetmissing.png", "hover" : "/assetmissing.png", "pressed" : "/assetmissing.png" }
+                  }
+              },
+              "thumbs" : {
+                  "horizontal" : {
+                    "base" : { "begin" : "/assetmissing.png", "end" : "/assetmissing.png", "inner" : "/assetmissing.png" },
+                    "hover" : { "begin" : "/assetmissing.png", "end" : "/assetmissing.png", "inner" : "/assetmissing.png" },
+                    "pressed" : { "begin" : "/assetmissing.png", "end" : "/assetmissing.png", "inner" : "/assetmissing.png" }
+                  },
+                  "vertical" : {
+                    "base" : { "begin" : "/assetmissing.png", "end" : "/assetmissing.png", "inner" : "/assetmissing.png" },
+                    "hover" : { "begin" : "/assetmissing.png", "end" : "/assetmissing.png", "inner" : "/assetmissing.png" },
+                    "pressed" : { "begin" : "/assetmissing.png", "end" : "/assetmissing.png", "inner" : "/assetmissing.png" }
+                  }
+              },
+              "children": {
+                "emojiListGroups": {
+                  "type": "list",
+                  "position": [0, 10],
+                  "callback": "customButtonCallback",
+                  "schema": {
+                    "selectedBG": "/assetmissing.png",
+                    "unselectedBG": "/assetmissing.png",
+                    "spacing": [0, 3],
+                    "memberSize": [10, 10],
+                    "listTemplate": {
+                      "emoji": {
+                        "type": "image",
+                        "file": "/assetmissing.png",
+                        "mouseTransparent": true
+                      }
+                    }
+                  }
+                }
+              }
+          },
+
+          "saAll": {
+              "type": "scrollArea",
+              "rect": [18, 10, 200, 78],
+              "zlevel": 5,
+              "children": {
+                  //Will be added dynamically
+              }
+          },
+          "tbxSearch": {
+              "type": "textbox",
+              "hint": "Search...",
+              "zlevel": 6,
+              "maxWidth": 195,
+              "position": [3, 1],
+              "callback": "customButtonCallback",
+              "escapeKey": "customButtonCallback2"
+          }
+        }
+      }
+    },
+  
+    "script": "/interface/scripted/starcustomchat/plugins/emojis/emojis.lua"
+  }

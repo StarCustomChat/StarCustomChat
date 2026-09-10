@@ -103,7 +103,7 @@
               "selectedBG" : "/interface/scripted/starcustomchatsettings/colorpicker/listselected.png",
               "unselectedBG" : "/interface/scripted/starcustomchatsettings/colorpicker/listunselected.png",
               "spacing" : [0, 1],
-              "memberSize" : [55, 15],
+              "memberSize" : [60, 15],
               "listTemplate" : {
                 "background" : {
                   "type" : "image",

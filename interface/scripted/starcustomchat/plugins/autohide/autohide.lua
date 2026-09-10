@@ -4,16 +4,13 @@ autohide = PluginClass:new(
   { name = "autohide" }
 )
 
-function autohide:init()
-  self:_loadConfig()
+function autohide:init(chat)
+  PluginClass.init(self, chat)
 
   self.timer = (root.getConfiguration("scc_autohide_timer") or 0)
   self.autohideTime = self.timer
   self.ignoreServerMessages = root.getConfiguration("scc_autohide_ignore_server_messages") or false
   self.ignoreInspectMessages = root.getConfiguration("scc_autohide_ignore_inspect_messages") or false
-
-  self.isOpenSB = root.assetOrigin and root.assetOrigin("/opensb/coconut.png")
-  self.isOSBXSB = self.isOpenSB or xsb
 end
 
 function autohide:onCursorOverride()
@@ -25,7 +22,7 @@ function autohide:update(dt)
     closeChat()
     self.autohideTime = self.timer
   end
-  self.autohideTime = widget.hasFocus("tbxInput") and self.timer or math.max(self.autohideTime - dt, 0)
+  self.autohideTime = self.customChat:hasFocusInput() and self.timer or math.max(self.autohideTime - dt, 0)
 end
 
 function isInspecting(message)
@@ -36,13 +33,9 @@ function isInspecting(message)
 end
 
 function autohide:onReceiveMessage(message)
-
-
   if message.connection and (message.connection == 0 and not self.ignoreServerMessages) or (message.connection ~= 0 and not (self.ignoreInspectMessages and isInspecting(message))) then
     self.autohideTime = self.timer
-    if self.isOSBXSB then
-      pane.show()
-    end
+    pane.show()
   end
 end
 

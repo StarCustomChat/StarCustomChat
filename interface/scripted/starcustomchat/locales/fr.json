@@ -7,14 +7,16 @@
   "chat.modes.Whisper": "Chuchotement",
   "chat.modes.RadioMessage": "MessageRadio",
   "chat.modes.CommandResult": "RetourCommande",
+  "chat.message.edited": "Modifié",
 
   "chat.textbox.hint": "Ecrivez ici",
+  "chat.textbox.hint.filter": "Filtrage des messages (\"%s\")",
 
   "chat.buttons.bottom": "Retour au début",
   "chat.buttons.settings": "Paramètres",
   "chat.buttons.hide": "Masquer le chat",
-  "chat.buttons.bigger_chat": "Agrandir la zone de texte",
   "chat.buttons.move_chat": "Déplacer le chat",
+  "chat.buttons.resize_chat": "Redimensionner le chat",
 
   "chat.alerts.dm_not_specified": "Choisir un destinataire",
   "chat.alerts.dm_not_found": "Le joueur doit se trouver sur la même planète",
@@ -47,8 +49,11 @@
   "settings.back": "Dos",
   "settings.add": "Ajouter",
   "settings.remove": "Retirer",
+  "settings.search": "Recherche...",
 
 
+  "chat.commands.unknown_argument": "Argument inconnu : %s",
+  "chat.commands.unknown_argument_expected": "Argument inconnu : %s, les valeurs autorisées sont %s",
 
 
   "commands.general.admin": "Active ou désactive le mode admin, qui débloque toutes les recettes d’artisanat, empêche les dégâts et la perte d’énergie, et donne accès aux commandes réservées aux administrateurs.",
@@ -119,19 +124,6 @@
   "commands.debug.togglelayer": "Active ou désactive un calque.",
   "commands.debug.upgradeship": "Améliore le vaisseau.",
 
-  "commands.starextentions.binds": "Affiche toutes les touches assignées.",
-  "commands.starextentions.breathing": "Active ou désactive la respiration.",
-  "commands.starextentions.guide": "Affiche le guide.",
-  "commands.starextentions.voice": "Active ou désactive le chat vocal.",
-  "commands.starextentions.swap": "Change de personnage actuel.",
-  "commands.starextentions.editor": "Ouvre l’éditeur.",
-  "commands.starextentions.identity": "Gère les paramètres d’identité.",
-  "commands.starextentions.identity.set": "Définit les attributs d’identité.",
-  "commands.starextentions.identity.get": "Récupère les attributs d’identité.",
-  "commands.starextentions.speech": "Active ou désactive la parole.",
-  "commands.starextentions.nightvision": "Active ou désactive la vision nocturne.",
-  "commands.starextentions.render": "Effectue le rendu de plusieurs parties du personnage et copie le résultat dans le presse-papiers.",
-
   "commands.openstarbound.swap": "Change de personnage actuel.",
   "commands.openstarbound.identity": "Gère les paramètres d’identité.",
   "commands.openstarbound.identity.set": "Définit les attributs d’identité.",
@@ -139,6 +131,7 @@
   "commands.openstarbound.render": "Effectue le rendu de plusieurs parties du personnage et les enregistre dans le dossier de stockage.",
 
   "commands.starcustomchat.clearchat": "Efface l’historique du chat.",
+  "commands.starcustomchat.filter": "Permet de filtrer les messages selon un texte spécifique. Laissez vide pour ne plus filtrer.",
 
   "commands.custom.hotreload": "Recharge la configuration."
 }

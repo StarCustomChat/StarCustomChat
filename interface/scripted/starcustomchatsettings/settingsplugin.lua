@@ -19,6 +19,29 @@ function SettingsPluginClass:new(obj)
     end
   })
 
+  obj:_loadConfig()
+  obj.getRootValue = function(...)
+    return Configuration:getRootValue(obj.name, ...)
+  end
+  obj.getPlayerValue = function(...)
+    return Configuration:getPlayerValue(obj.name, ...)
+  end
+  obj.setRootValue = function(parameter, value)
+    world.sendEntityMessage(player.id(), "scc_set_settings", {
+      pluginName = obj.name,
+      scope = "root",
+      parameter = parameter,
+      value = value
+    })
+  end
+  obj.setPlayerValue = function(...)
+    world.sendEntityMessage(player.id(), "scc_set_settings", {
+      pluginName = obj.name,
+      scope = "player",
+      parameter = parameter,
+      value = value
+    })
+  end
   return obj
 end
 

@@ -1,0 +1,19 @@
+{
+    "settings.plugins.stickers": "Наліпкі",
+    "settings.plugins.stickers.alerts.name_error": "Наліпкі павінны мець інструкцыі і назву",
+    "settings.plugins.stickers.alerts.image_error": "Не ўдалося загрузіць выяву",
+    "settings.plugins.stickers.alerts.size_error": "Выява не павінна перавышаць %sx%s",
+    "settings.plugins.stickers.alerts.empty_error": "Устаўце інструкцыі ў тэкставае поле",
+    "settings.plugins.stickers.alerts.already_exists": "Наліпка з такой назвай ужо існуе",
+    "settings.plugins.stickers.name": "Назва",
+    "settings.plugins.stickers.search": "Пошук",
+    "settings.colors.stickerselect": "Наліпкі",
+    "chat.commands.save_sticker": "Захаваць наліпку",
+    "chat.commands.alerts.saved": "Наліпка %s захавана!",
+    "stickers.name_preview": "Наліпка: %s",
+    "settings.plugins.stickers.dialogs.remove.title": "Выдаленне наліпкі",
+    "settings.plugins.stickers.dialogs.remove.subtitle": "^red;Гэта дзеянне нельга адмяніць.",
+    "settings.plugins.stickers.dialogs.remove.message": "Вы ўпэўнены, што хочаце выдаліць наліпку ^violet;%s^reset;?",
+    "settings.plugins.stickers.dialogs.remove.ok": "Выдаліць",
+    "settings.plugins.stickers.dialogs.remove.cancel": "Скасаваць"
+}

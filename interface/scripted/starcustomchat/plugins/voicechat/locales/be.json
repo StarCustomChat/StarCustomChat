@@ -1,0 +1,9 @@
+{
+    "chat.modes.Voice": "Галасавы чат",
+    "settings.plugins.voicechat": "Галасавы чат",
+    "settings.voice.binds.starextensions": "Канфігурацыя кнопак выбіраецца ў /binds -> StarExtensions -> Voice Chat.\nНалады галасавога чата знаходзяцца ў /voice",
+    "settings.voice.binds.openstarbound": "Налады галасавога чата перанесены ў Game Menu - Options - Voice Chat Settings",
+    "settings.voice.default_enable": "Уключаць па змаўчанні",
+    "settings.voice.settings": "Налады галасавога чата",
+    "settings.voice.binds_button": "Бінды"
+}

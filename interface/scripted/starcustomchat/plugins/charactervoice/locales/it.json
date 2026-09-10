@@ -3,6 +3,7 @@
     "settings.plugins.charactervoice.enable": "Abilita",
     "settings.plugins.charactervoice.enablewhisper": "Abilita in DM",
     "settings.plugins.charactervoice.pitch": "Pitch",
+    "settings.plugins.charactervoice.volume": "Volume",
     "settings.plugins.charactervoice.test": "Test",
     "settings.plugins.charactervoice.description": "Riproduci suono quando invii un messaggio",
     "settings.plugins.charactervoice.wisperDescription": "Riproduci suono quando sussurri ad un giocatore",

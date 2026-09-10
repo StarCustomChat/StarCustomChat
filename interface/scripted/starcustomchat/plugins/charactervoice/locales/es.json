@@ -3,6 +3,7 @@
     "settings.plugins.charactervoice.enable": "Habilitado",
     "settings.plugins.charactervoice.enablewhisper": "Mensaje directo",
     "settings.plugins.charactervoice.pitch": "Tono",
+    "settings.plugins.charactervoice.volume": "Volumen",
     "settings.plugins.charactervoice.test": "Probar",
     "settings.plugins.charactervoice.description": "Cuando se envia un mensaje, suena el sonido de habla seleccionado",
     "settings.plugins.charactervoice.wisperDescription": "Cuando se susurra un mensaje, suena el sonido de habla seleccionado",

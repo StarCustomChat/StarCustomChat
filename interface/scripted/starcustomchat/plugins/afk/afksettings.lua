@@ -7,7 +7,6 @@ afk = SettingsPluginClass:new(
 
 -- Settings
 function afk:init()
-  self:_loadConfig()
 
   self.settingsTimer = root.getConfiguration("scc_afk_timer") or 0
   self.widget.setText("lblAfkTimer", self.settingsTimer)

@@ -14,6 +14,10 @@ function TimerKeeper:add(duration, fun)
     }
 end
 
+function TimerKeeper:clear()
+  self.timers = {}
+end
+
 function TimerKeeper:empty()
   return #self.timers == 0
 end

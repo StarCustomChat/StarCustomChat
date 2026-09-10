@@ -1,0 +1,9 @@
+{
+    "chat.typing.typing_one": "%s está digitando",
+    "chat.typing.typing_few": "%s e %s estão digitando",
+    "chat.typing.typing_multiple": "Várias pessoas estão digitando",
+
+    "settings.plugins.typing": "Indicar digitação",
+    "settings.plugins.typing.player_portraits": "Indicar de Digitação nos Retratos\n^gray;(Somente no Modo Moderno)",
+    "settings.plugins.typing.status_message": "Mensagem de Status de Digitação"
+}

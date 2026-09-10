@@ -6,12 +6,7 @@ voicechat = SettingsPluginClass:new(
 
 
 -- Settings
-function voicechat:init()
-  self:_loadConfig()
-
-  self.isOpenSB = root.assetOrigin and root.assetOrigin("/opensb/coconut.png")
-  self.isOSBXSB = self.isOpenSB or xsb
-
+function voicechat:init()  
   self.enabled = root.getConfiguration("scc_voice_enabled") or false
   self.widget.setChecked("chkEnableDefault", self.enabled)
 end
@@ -29,9 +24,5 @@ function voicechat:binds()
 end
 
 function voicechat:uninit()
-  if self.isOSBXSB then
-    root.setConfiguration("scc_voice_enabled", voice.getSettings()["enabled"])
-  else
-    root.setConfiguration("scc_voice_enabled", voice.enabled())
-  end
+  root.setConfiguration("scc_voice_enabled", voice.getSettings()["enabled"])
 end

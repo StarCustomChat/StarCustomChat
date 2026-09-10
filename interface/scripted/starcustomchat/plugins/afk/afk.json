@@ -175,5 +175,6 @@
     "putToSleep": true
   },
   "script": "/interface/scripted/starcustomchat/plugins/afk/afk.lua",
-  "settingsScript": "/interface/scripted/starcustomchat/plugins/afk/afksettings.lua"
+  "settingsScript": "/interface/scripted/starcustomchat/plugins/afk/afksettings.lua",
+  "commands": "/interface/scripted/starcustomchat/plugins/afk/commands.config"
 }

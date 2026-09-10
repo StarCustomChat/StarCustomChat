@@ -91,7 +91,7 @@ function stickers:onReceiveMessage(message)
 end
 
 function stickers:onCreateTooltip(screenPosition)
-  local selectedMessage = self.customChat:selectMessage()
+  local selectedMessage = self.customChat:selectMessage(screenPosition)
   if selectedMessage and selectedMessage.image then
     return starcustomchat.utils.getTranslation("stickers.name_preview", selectedMessage.text)
   end

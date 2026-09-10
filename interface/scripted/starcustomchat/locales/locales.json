@@ -38,5 +38,9 @@
   {
     "name": "Polski",
     "code": "pl"
+  },
+  {
+    "name": "Беларуская",
+    "code": "be"
   }
 ]

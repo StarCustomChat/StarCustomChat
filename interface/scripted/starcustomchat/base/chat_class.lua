@@ -10,12 +10,13 @@ require "/interface/scripted/starcustomchat/base/starcustomchatutils.lua"
 StarCustomChat = {
   messages = jarray(),
   drawnMessageIndexes = jarray(),
+  -- Pixel offset applied to the newest drawn message. 0 means pinned to the bottom.
   lineOffset = 0,
   canvas = nil,
   highlightCanvas = nil,
+  topCanvasWid = nil,
   totalHeight = 0,
   config = {},
-  expanded = false,
   chatMode = "modern",
   savedPortraits = {},
   connectionToUuid = {},
@@ -26,13 +27,14 @@ StarCustomChat = {
   defaultColors = {},
   callbackPlugins = function() end,
   timezoneOffset = 0,
-  fontTable = {}
+  fontTable = {},
+  textBox = nil
 }
 
 StarCustomChat.__index = StarCustomChat
 
-function StarCustomChat:create (canvasWid, backgroundCanvasWid, highlightCanvasWid, config, messages, 
-  chatMode, expanded, savedPortraits, connectionToUuid, lineOffset, maxCharactersAllowed, defaultColors, callbackPlugins)
+function StarCustomChat:create (canvasWid, backgroundCanvasWid, highlightCanvasWid, topCanvasWid, config, messages, 
+  chatMode, savedPortraits, connectionToUuid, lineOffset, maxCharactersAllowed, defaultColors, callbackPlugins)
 
   local o = {}
   setmetatable(o, self)
@@ -43,9 +45,9 @@ function StarCustomChat:create (canvasWid, backgroundCanvasWid, highlightCanvasW
   o.canvas = widget.bindCanvas(canvasWid)
   o.backgroundCanvas = widget.bindCanvas(backgroundCanvasWid)
   o.highlightCanvas = widget.bindCanvas(highlightCanvasWid)
+  o.topCanvas = widget.bindCanvas(topCanvasWid)
   o.config = config
   o.chatMode = chatMode
-  o.expanded = expanded
   o.savedPortraits = savedPortraits or {}
   o.connectionToUuid = connectionToUuid or {}
   o.lineOffset = lineOffset or 0
@@ -53,9 +55,31 @@ function StarCustomChat:create (canvasWid, backgroundCanvasWid, highlightCanvasW
   o.callbackPlugins = callbackPlugins
   
   o.timezoneOffset = root.getConfiguration("scc_timezone_offset") or 0
-  o.isOpenSB = root.assetOrigin and root.assetOrigin("/opensb/coconut.png")
   o.fontTable = root.getConfiguration("scc_custom_fonts") or {}
   o.colorTable = defaultColors
+  local textboxSize = widget.getSize("imgTextbox")
+  o.textBox = Textbox:setup("imgTextbox", {
+    onChanged = textboxCallback,
+    onEnterKey = textboxEnterKey,
+    onEscapeKey = escapeTextbox,
+    scroll = {
+      scrollEnabled = true,
+      scrollOffset = { -8, 0 },
+      scrollGap = 1
+    },
+    tabInsertText = "",
+    lineSpacing = 1,
+    caretColor = {255, 255, 255, 255},
+    rect = {2, 0, textboxSize[1] - 1, textboxSize[2]},
+    maxHeight = 60,
+    onSizeChange = function(newSize)
+      local old = widget.getSize("imgTextbox")
+      widget.setSize("imgTextbox", {old[1], newSize[2]})
+      if setSizes then setSizes(o.config) end
+      o:processQueue()
+    end
+  })
+  
   return o
 end
 
@@ -66,16 +90,16 @@ function StarCustomChat:drawBackground()
   else
     local color = self:getColor("background"):sub(2)
     widget.setImageStretchSet("background", {
-      ["end"] = "/interface/scripted/starcustomchat/base/bodyheader.png?replace;FFFFFF01=" .. color,
-      ["inner"] = "/interface/scripted/starcustomchat/base/bodyinner.png?replace;FFFFFF01=" .. color,
-      ["begin"] = "/interface/scripted/starcustomchat/base/bodyfooter.png?replace;FFFFFF01=" .. color
+      ["end"] = "/interface/scripted/starcustomchat/base/images/body/bodyheader.png?replace;FFFFFF01=" .. color,
+      ["inner"] = "/interface/scripted/starcustomchat/base/images/body/bodyinner.png?replace;FFFFFF01=" .. color,
+      ["begin"] = "/interface/scripted/starcustomchat/base/images/body/bodyfooter.png?replace;FFFFFF01=" .. color
     })
   end
 end
 
 function StarCustomChat:addMessage(msg)
 
-  function formatMessage(message)
+  local function formatMessage(message)
 
     if message.mode == "RadioMessage" and message.portrait then
       message.portrait = message.portrait .. self.config.radioMessageCropDirective
@@ -122,7 +146,7 @@ function StarCustomChat:addMessage(msg)
   end
 
   if msg.connection then
-    msg.uuid = util.hashString(msg.connection .. (msg.text or ""))
+    msg.uuid = self:calculateUUID(msg)
     msg = formatMessage(msg)
     if msg then
       table.insert(self.messages, msg)
@@ -135,8 +159,23 @@ function StarCustomChat:addMessage(msg)
   end
 end
 
+function StarCustomChat:setFilter(data)
+  if not data or (string.gsub(data, "^%s*(.-)%s*$", "%1")) == "" then
+    self.filter = nil
+    self:resetHint()
+  else
+    self.filter = data
+    self:setHint(starcustomchat.utils.getTranslation("chat.textbox.hint.filter", self.filter))
+  end
+  self:processQueue()
+end
+
 function StarCustomChat:getColor(type)
   return self.colorTable[type] and "#" .. self.colorTable[type] or self.config.defaultColor
+end
+
+function StarCustomChat:calculateUUID(message)
+  return util.hashString(message.connection .. (message.text or ""))
 end
 
 function StarCustomChat:findMessageByUUID(uuid)
@@ -145,6 +184,18 @@ function StarCustomChat:findMessageByUUID(uuid)
       return i 
     end
   end
+end
+
+function StarCustomChat:findMessagesByConnection(connection)
+  local messagesByConnection = {}
+
+  for i = #self.messages, 1, -1 do 
+    if self.messages[i].connection and self.messages[i].connection == connection then 
+      table.insert(messagesByConnection, self.messages[i])
+    end
+  end
+  
+  return messagesByConnection
 end
 
 function StarCustomChat:replaceUUID(oldUUID, newUUID)
@@ -174,27 +225,24 @@ function StarCustomChat:setSubMenuTexts(hint, text)
 end
 
 function StarCustomChat:openSubMenu(type, hint, text)
-  if not widget.active("lytSubMenu") then
-    local size = {0, widget.getSize("lytSubMenu")[2]}
-    widget.setPosition("lytCommandPreview", vec2.add(widget.getPosition("lytCommandPreview"), size))
-    widget.setPosition(self.canvasName, vec2.add(widget.getPosition(self.canvasName), size))
-    widget.setSize(self.canvasName, vec2.sub(widget.getSize(self.canvasName), size))
-    widget.setPosition("cnvHighlightCanvas", vec2.add(widget.getPosition("cnvHighlightCanvas"), size))
-  else
+  self.submenuType = type
+  if widget.active("lytSubMenu") then
     self.callbackPlugins("onSubMenuReopen", type)
   end
   self:setSubMenuTexts(hint, text)
   widget.setVisible("lytSubMenu", true)
+  if setSizes then setSizes(self.config) end
+end
+
+function StarCustomChat:getSubMenuType()
+  return self.submenuType
 end
 
 function StarCustomChat:closeSubMenu()
+  self.submenuType = nil
   if widget.active("lytSubMenu") then
     widget.setVisible("lytSubMenu", false)
-    local size = {0, widget.getSize("lytSubMenu")[2]}
-    widget.setPosition("lytCommandPreview", vec2.sub(widget.getPosition("lytCommandPreview"), size))
-    widget.setPosition(self.canvasName, vec2.sub(widget.getPosition(self.canvasName), size))
-    widget.setSize(self.canvasName, vec2.add(widget.getSize(self.canvasName), size))
-    widget.setPosition("cnvHighlightCanvas", vec2.sub(widget.getPosition("cnvHighlightCanvas"), size))
+    if setSizes then setSizes(self.config) end
   end
 end
 
@@ -249,12 +297,83 @@ function StarCustomChat:resetChat()
   self.config.fontSize = newChatSize
   self.maxCharactersAllowed  = maxCharactersAllowed
   self.colorTable = sb.jsonMerge(self.colorTable, root.getConfiguration("scc_custom_colors") or {})
-  widget.setFontColor("tbxInput", self:getColor("chattext"))
+  self:setTextColor(self:getColor("chattext"))
 
   self:requestPortrait(starcustomchat.utils.entityIdToConnection(player.id()), true)
 
   self:drawBackground()
   self:processQueue()
+end
+
+function StarCustomChat:setInformationalText(text)
+  local shouldShow = text and text ~= ""
+  if widget.active("lytNotification") ~= shouldShow then
+    widget.setVisible("lytNotification", shouldShow)
+    self:processQueue()
+  end
+  widget.setText("lytNotification.lblNotification", text and "^font=hobo_i;" .. text or "")
+end
+
+function StarCustomChat:resetInformationalText()
+  if widget.active("lytNotification") then
+    widget.setVisible("lytNotification", false)
+    self:processQueue()
+  end
+  widget.setText("lytNotification.lblNotification", "")
+end
+
+-- Textbox callbacks
+function StarCustomChat:setText(text)
+  self.textBox:setText(text)
+end
+
+function StarCustomChat:getText()
+  return self.textBox:getText()
+end
+
+function StarCustomChat:blurInput()
+  self.textBox:blur()
+end
+
+function StarCustomChat:focusInput()
+  self.textBox:focus()
+end
+
+function StarCustomChat:hasFocusInput()
+  return self.textBox:hasFocus()
+end
+
+function StarCustomChat:setHint(hint)
+   self.textBox:setHint(hint)
+end
+
+function StarCustomChat:resetHint()
+   self.textBox:setHint(starcustomchat.utils.getTranslation("chat.textbox.hint"))
+end
+
+function StarCustomChat:setTextColor(color)
+  self.textBox:setTextColor(color)
+end
+
+function StarCustomChat:ignoreInputFrame()
+  self.textBox:setIgnoreInputFrame(true)
+end
+
+function StarCustomChat:setMaxHeight(height)
+  self.textBox:setMaxHeight(height)
+end
+
+---@public
+function StarCustomChat:updateTextboxMaxHeight()
+  if not pane.getSize then
+    return
+  end
+  local maxHeight = math.floor(pane.getSize()[2] * self.config.textboxMaxHeighSize)
+  
+  -- Ensure a reasonable minimum
+  maxHeight = math.max(maxHeight, self.config.minChatBodyHeight * self.config.textboxMaxHeighSize)
+  
+  self:setMaxHeight(maxHeight)
 end
 
 function StarCustomChat:getMessages()
@@ -267,24 +386,12 @@ function StarCustomChat:processCommand(text)
     local commandResult = chat.command(text) or {}
 
     for _, line in ipairs(commandResult) do 
-      if xsb then
-        -- Do nothing
-      elseif self.isOpenSB then
-        self:addMessage({
-          connection = 0,
-          mode = "CommandResult",
-          text = line,
-          tooltip = starcustomchat.utils.cropMessage(text, self.config.commandHintCharacterLimit)
-        })
-      else
-        chat.addMessage(line)
-        table.insert(self.messages, {
-          text = line
-        })
-        if #self.messages > self.config.chatHistoryLimit then
-          table.remove(self.messages, 1)
-        end
-      end
+      self:addMessage({
+        connection = 0,
+        mode = "CommandResult",
+        text = line,
+        tooltip = starcustomchat.utils.cropMessage(text, self.config.commandHintCharacterLimit)
+      })
     end
     return commandResult
   end
@@ -303,7 +410,7 @@ function portraitSizeFromBaseFont(font)
   return math.floor(font * 2.5)
 end
 
-function StarCustomChat:previewCommands(commands, selected)
+function StarCustomChat:drawCommandPreview(commands, selected)
 
   local result = ""
   local n = #commands
@@ -311,7 +418,8 @@ function StarCustomChat:previewCommands(commands, selected)
   for j = 0, n - 1 do
     local i = (selected + j - 1) % n + 1
     if type(commands[i]) == "table" then
-      result = result .. "^" .. (j == 0 and self:getColor(commands[i].color or "commandselecttext") or self:getColor("chattext")) .. ";" .. commands[i].data .. " "
+      local previewText = commands[i].name or commands[i].displayName or commands[i].data or commands[i].command or ""
+      result = result .. "^" .. (j == 0 and self:getColor(commands[i].color or "commandselecttext") or self:getColor("chattext")) .. ";" .. previewText .. " "
     else
       result = result .. "^" .. (j == 0 and self:getColor("commandselecttext") or self:getColor("chattext")) .. ";" .. commands[i] .. " "
     end
@@ -319,11 +427,16 @@ function StarCustomChat:previewCommands(commands, selected)
 
   widget.setText("lytCommandPreview.lblCommandPreview", result)
 
+  local backgroundSize = widget.getSize("lytCommandPreview.imgStretchDescription")
   if commands[selected].description then
     widget.setText("lytCommandPreview.lblDescription", starcustomchat.utils.hasTranslation(commands[selected].description) and
-    starcustomchat.utils.getTranslation(commands[selected].description) or commands[selected].description)
+      starcustomchat.utils.getTranslation(commands[selected].description) or commands[selected].description)
+
+    
+    widget.setSize("lytCommandPreview.imgStretchDescription", {backgroundSize[1], widget.getSize("lytCommandPreview.lblDescription")[2] + 7})
   else
     widget.setText("lytCommandPreview.lblDescription", "")
+    widget.setSize("lytCommandPreview.imgStretchDescription", {backgroundSize[1], 0})
   end
 end
 
@@ -432,11 +545,14 @@ function StarCustomChat:drawIcon(target, nickname, messageOffset, color, time, r
   local nameOffset = vec2.add(self.config.nameOffset, {size, size})
   nameOffset = vec2.add(nameOffset, messageOffset)
 
-  self.canvas:drawText(recipient and "-> " .. recipient or nickname, {
-    position = nameOffset,
-    horizontalAnchor = "left", -- left, mid, right
-    verticalAnchor = "top" -- top, mid, bottom
-  }, self.config.fontSize + 1, (color or self:getColor("chattext")), nil, self:getFont("chattext"))
+  if recipient or nickname then
+
+    self.canvas:drawText(recipient and "-> " .. recipient or nickname, {
+      position = nameOffset,
+      horizontalAnchor = "left", -- left, mid, right
+      verticalAnchor = "top" -- top, mid, bottom
+    }, self.config.fontSize + 1, (color or self:getColor("chattext")), nil, self:getFont("chattext"))
+  end
 
   if time then
     local timePosition = {self.canvas:size()[1] - self.config.timeOffset[1], nameOffset[2] + self.config.timeOffset[2]}
@@ -448,30 +564,36 @@ function StarCustomChat:drawIcon(target, nickname, messageOffset, color, time, r
   end
 end
 
-
---TODO: instead of all messages we need to look at the messages that are drawn
 function StarCustomChat:offsetCanvas(offset)
   if not offset then return end
-  
-  if #self.drawnMessageIndexes > 0 and self.messages[self.drawnMessageIndexes[1]].offset + self.messages[self.drawnMessageIndexes[1]].height - 20 < 0 and offset < 0 then
-    return
-  else
-    self.lineOffset = math.min(self.lineOffset + offset, 0)
-    self:processQueue()    
+
+    
+  if #self.drawnMessageIndexes > 0 and offset < 0 then
+    local firstMessage = self.messages[self.drawnMessageIndexes[1]]
+    local remainingOffset = firstMessage.offset + firstMessage.height
+
+    if remainingOffset <= 0 then
+      return
+    end
+
+    offset = math.max(offset, -remainingOffset)
+  end
+
+  local lineOffset = math.min(self.lineOffset + offset, 0)
+  if lineOffset ~= self.lineOffset then
+    self.lineOffset = lineOffset
+    self:processQueue()
   end
 end
 
 function StarCustomChat:scrollToMessage(ind, targetY)
   local message = self.messages[ind]
-  if not message 
-    or self:isInsideChat(message, message.offset, self.config.spacings.name + self.config.fontSize + 1, self.canvas:size()) then
+  if not message or not message.offset or not message.height then
     return
   end
 
-  local lineHeight = self.config.fontSize + self.config.spacings.lines
-
   targetY = targetY or 0
-  self:offsetCanvas((targetY - message.offset - message.height) / lineHeight)
+  self:offsetCanvas(targetY - message.offset - message.height)
 end
 
   
@@ -484,6 +606,7 @@ function StarCustomChat:resetCanvasOffset()
   self.lineOffset = 0
   self:processQueue()
 end
+
 
 function StarCustomChat:highlightMessage(message, color)
   for i = #self.drawnMessageIndexes, 1, -1 do 
@@ -499,6 +622,7 @@ end
 
 function StarCustomChat:clearHighlights()
   self.highlightCanvas:clear()
+  self.topCanvas:clear()
 end
 
 function StarCustomChat:collapseMessage(position)
@@ -514,26 +638,40 @@ function StarCustomChat:collapseMessage(position)
   end
 end
 
-function StarCustomChat:selectMessage(position)
-  local pos = position or self.highlightCanvas:mousePosition()
+function StarCustomChat:selectMessage(position, isCanvasPosition)
+  if not position then return end
+
+  local pos = position
+  if not isCanvasPosition then
+    if not widget.inMember("cnvHighlightCanvas", position) then return end
+    pos = self.highlightCanvas:mousePosition()
+  end
+
+  if not pos then return end
 
   for i = #self.drawnMessageIndexes, 1, -1 do 
     local message = self.messages[self.drawnMessageIndexes[i]]
     if message.offset and pos[2] > (message.offset or 0) and pos[2] <= message.offset + message.height + self.config.spacings.messages  then
-      self:highlightMessage(message)
       return message
     end
   end
 end
 
-function filterMessages(messages)
+function filterMessages(messages, filter)
   local drawnMessageIndexes = {}
 
   for i, message in ipairs(messages) do 
     --filter messages by mode availability
     local mode = message.mode
     
-    if mode and (widget.active("btnCk" .. mode) == nil and true or widget.getChecked("btnCk"  .. mode)) then
+    if mode
+      and (widget.active("lytModeFilter.btnCk" .. mode) == nil or widget.getChecked("lytModeFilter.btnCk" .. mode))
+      and (
+        not filter
+        or (message.text and string.find(utf8.lower(message.text), utf8.lower(filter), 1, true))
+        or (message.nickname and string.find(utf8.lower(message.nickname), utf8.lower(filter), 1, true))
+      )
+    then
       table.insert(drawnMessageIndexes, i)
     end
   end
@@ -562,13 +700,13 @@ function StarCustomChat:getTextSize(text, fontSize)
   local labelToCheck = self.chatMode == "modern" and "totallyFakeLabelFullMode" or "totallyFakeLabelCompactMode"
 
   if fontSize then
-    createTotallyFakeWidgets(self.config.wrapWidthFullMode, self.config.wrapWidthCompactMode, fontSize)
+    createTotallyFakeWidgets(self.config.wrapWidthFullMode, self.config.wrapWidthCompactMode, fontSize, self:getFont("chattext"))
   end
   widget.setText(labelToCheck, text)
   local sizeOfText = widget.getSize(labelToCheck)
   widget.setText(labelToCheck, "")
-  if fontSize then
-    createTotallyFakeWidgets(self.config.wrapWidthFullMode, self.config.wrapWidthCompactMode, self.config.fontSize)
+  if fontSize then -- Return back to default
+    createTotallyFakeWidgets(self.config.wrapWidthFullMode, self.config.wrapWidthCompactMode, self.config.fontSize, self:getFont("chattext"))
   end
 
   return sizeOfText
@@ -579,14 +717,27 @@ function StarCustomChat:getFont(name)
 end
 
 function StarCustomChat:setFonts(fontTable)
-  self.fontTable = fontTable
-  self:processQueue()
+  if fontTable then
+    self.fontTable = fontTable
+
+    createTotallyFakeWidgets(
+      self.config.wrapWidthFullMode,
+      self.config.wrapWidthCompactMode,
+      self.config.fontSize,
+      self:getFont("chattext")
+    )
+
+    self.recalculateHeight = true
+    --self.textBox:setFont(self:getFont("chattext"))
+    self:processQueue()
+  end
 end
+
 
 function StarCustomChat:processQueue()
   self.canvas:clear()
   self.totalHeight = 0
-  self.drawnMessageIndexes = filterMessages(self.messages)
+  self.drawnMessageIndexes = filterMessages(self.messages, self.filter)
 
   for i = #self.drawnMessageIndexes, 1, -1 do 
     local message = self.messages[self.drawnMessageIndexes[i]]
@@ -602,7 +753,15 @@ function StarCustomChat:processQueue()
     
     -- If the message should contain an avatar and name:
     local prevDrawnMessage = self.messages[self.drawnMessageIndexes[i - 1]]
-    message.avatar = i == 1 or (message.connection ~= prevDrawnMessage.connection or message.mode ~= prevDrawnMessage.mode or message.nickname ~= prevDrawnMessage.nickname or message.portrait ~= prevDrawnMessage.portrait or message.forceAvatar)
+    message.avatar = 
+      i == 1 or (
+        message.connection ~= prevDrawnMessage.connection or 
+        message.mode ~= prevDrawnMessage.mode or 
+        message.nickname ~= prevDrawnMessage.nickname or 
+        message.displayName ~= prevDrawnMessage.displayName or 
+        message.portrait ~= prevDrawnMessage.portrait or 
+        message.forceAvatar
+      )
 
 
     local text = self.chatMode == "modern" and message.text 
@@ -624,54 +783,38 @@ function StarCustomChat:processQueue()
       local sizeOfText = message.imageSize and vec2.div(message.imageSize, 10 / self.config.fontSize) or self:getTextSize(text)
 
       if not sizeOfText then return end 
-        message.height = sizeOfText[2]
-        message.textHeight = message.height
-      else
-        message.height = message.textHeight
-      end
+
+      message.height = sizeOfText[2]
+      message.textHeight = message.height
+    else
+      message.height = message.textHeight
+    end
 
     -- Calculate message offset
-    local messageOffset = self.lineOffset * (self.config.fontSize + self.config.spacings.lines)
+    local messageOffset = self.lineOffset + self.config.notificationHeight
 
     if i ~= #self.drawnMessageIndexes then
       messageOffset = self.messages[self.drawnMessageIndexes[i + 1]].offset + self.messages[self.drawnMessageIndexes[i + 1]].height + self.config.spacings.messages
     end
 
-    local reactionOffset = 0
+    -- Plugins reserve any space their decorations need before this message is drawn.
+    -- bodyOffset shifts the built-in text/image down, while bodyHeight is the height
+    -- occupied before the avatar and bottom decorations.
+    local drawData = {
+      messageOffset = messageOffset,
+      bodyOffset = 0,
+      bodyHeight = message.height,
+      height = message.height
+    }
+    self.callbackPlugins("onMeasureMessage", message, drawData)
 
-    -- Reactions
-    if message.reactions and next(message.reactions) then
-      local size = portraitSizeFromBaseFont(self.config.fontSize)
-      local xOffset = self.chatMode == "modern" and self.config.nameOffset[1] + size or self.config.textOffsetCompactMode[1]
-
-      local emojiStartOffset = vec2.add({xOffset, messageOffset}, self.config.emotesOffset)
-      for ind, reactObj in ipairs(message.reactions) do 
-        local reaction = reactObj.reaction
-
-        if not root.assetOrigin(string.format("/emotes/%s.emote.png", reaction)) then
-          reaction = "unknown"
-          message.reactions[ind].reaction = "unknown"
-        end
-
-        self.canvas:drawImage(string.format("/emotes/%s.emote.png", reaction),
-          emojiStartOffset, 1 / 16 * self.config.fontSize)
-
-        local myNameInd = index(reactObj.nicknames, player.name()) ~= 0 -- if we have emoted
-
-        self.canvas:drawText(#reactObj.nicknames, {
-          position = vec2.add(emojiStartOffset, {self.config.emoteNumberSpace * self.config.fontSize / 10, 0}),
-          horizontalAnchor = "left", -- left, mid, right
-          verticalAnchor = "bottom", -- top, mid, bottom
-          wrapWidth = self.config.wrapWidthFullMode -- wrap width in pixels or nil
-        }, self.config.fontSize - 1, myNameInd and "cornflowerblue" or self:getColor("chattext"))
-
-        message.reactions[ind].position = copy(emojiStartOffset)
-        emojiStartOffset[1] = emojiStartOffset[1] + self.config.emoteSpacing * self.config.fontSize / 10
-      end
-
-      reactionOffset = self.config.emotePanelHeight * self.config.fontSize / 10
-      message.height = message.height + reactionOffset
-    end
+    local avatarOffset = self.chatMode == "modern" and message.avatar
+      and self.config.spacings.name + self.config.fontSize + 1
+      or 0
+    drawData.avatarOffset = avatarOffset
+    drawData.height = drawData.height + avatarOffset
+    local messageBodyHeight = drawData.bodyHeight
+    message.height = messageBodyHeight
 
     -- Draw the actual message unless it's outside of drawing area
     if self.chatMode == "modern" then
@@ -681,10 +824,10 @@ function StarCustomChat:processQueue()
 
 
         if message.image then
-          self.canvas:drawImage(message.image, {nameOffset[1], messageOffset + reactionOffset}, 1 / 10 * self.config.fontSize)
+          self.canvas:drawImage(message.image, {nameOffset[1], messageOffset + drawData.bodyOffset}, 1 / 10 * self.config.fontSize)
         else
           self.canvas:drawText(text, {
-            position = {nameOffset[1], messageOffset + reactionOffset},
+            position = {nameOffset[1], messageOffset + drawData.bodyOffset},
             horizontalAnchor = "left", -- left, mid, right
             verticalAnchor = "bottom", -- top, mid, bottom
             wrapWidth = self.config.wrapWidthFullMode -- wrap width in pixels or nil
@@ -694,10 +837,10 @@ function StarCustomChat:processQueue()
 
 
         if message.avatar then
-          local offset = {0, messageOffset + self.config.textOffsetFullMode[2] + message.height - self.config.fontSize}
+          local offset = {0, messageOffset + self.config.textOffsetFullMode[2] + messageBodyHeight - self.config.fontSize}
+          message.avatarOffset = offset
           self:drawIcon(message.portrait, message.displayName or message.nickname, offset, self.config.modeColors[messageMode], 
             message.time, message.recipient)
-          message.height = message.height + self.config.spacings.name + self.config.fontSize + 1
         end
       end
     
@@ -707,7 +850,7 @@ function StarCustomChat:processQueue()
         
         if not message.image then
           self.canvas:drawText(text, {
-            position = {offset[1], offset[2] + reactionOffset},
+            position = {offset[1], offset[2] + drawData.bodyOffset},
             horizontalAnchor = "left", -- left, mid, right
             verticalAnchor = "bottom", -- top, mid, bottom
             wrapWidth = self.config.wrapWidthCompactMode -- wrap width in pixels or nil
@@ -719,14 +862,14 @@ function StarCustomChat:processQueue()
             "", message.time, self:getColor("timetext"), self:getFont("timetext"))
           
           self.canvas:drawText(text, {
-            position = {offset[1], offset[2] + reactionOffset},
+            position = {offset[1], offset[2] + drawData.bodyOffset},
             horizontalAnchor = "left", -- left, mid, right
             verticalAnchor = "bottom", -- top, mid, bottom
             wrapWidth = self.config.wrapWidthCompactMode -- wrap width in pixels or nil
           }, self.config.fontSize, message.color or self:getColor("chattext"), nil, self:getFont("chattext"))
 
           local nameWidth = self:getTextSize(text)
-          self.canvas:drawImage(message.image, {offset[1] + nameWidth[1], offset[2] + reactionOffset}, 1 / 10 * self.config.fontSize)
+          self.canvas:drawImage(message.image, {offset[1] + nameWidth[1], offset[2] + drawData.bodyOffset}, 1 / 10 * self.config.fontSize)
         end
 
         if message.avatar then
@@ -737,35 +880,14 @@ function StarCustomChat:processQueue()
       end
     end
 
-    local replyOffset = 0
-    local prevMessage = message.replyUUID and self:findMessageByUUID(message.replyUUID)
-    if prevMessage then
-      replyOffset = self.config.replyOffsetHeight * self.config.fontSize / 10
-
-      local size = portraitSizeFromBaseFont(self.config.fontSize)
-      local xOffset = self.chatMode == "modern" and self.config.nameOffset[1] + size or self.config.textOffsetCompactMode[1]
-
-      local replyStartOffset = vec2.add({xOffset, messageOffset + message.height}, self.config.replyImageOffset)
-      self.canvas:drawImage("/interface/scripted/starcustomchat/plugins/reply/reply.png", 
-        replyStartOffset, 1 / 8 * self.config.fontSize)
-        
-      local croppedText = string.format("%s: %s", self.messages[prevMessage].displayName or self.messages[prevMessage].nickname, 
-        starcustomchat.utils.cropMessage(starcustomchat.utils.clearMetatags(self.messages[prevMessage].text), self.canvas:size()[1] // 10) )
-      
-      self.canvas:drawText(croppedText, {
-          position = vec2.add(replyStartOffset, {size / 2, 0}),
-          horizontalAnchor = "left",
-          verticalAnchor = "bottom"
-        }, self.config.fontSize / 1.2, self:getColor("replytext"), nil, self:getFont("chattext"))
-        
-      message.height = message.height + replyOffset
-    end
-    
+    message.height = drawData.height
     message.offset = messageOffset
     self.totalHeight = self.totalHeight + message.height
     self.messages[self.drawnMessageIndexes[i]] = message
 
-    self.callbackPlugins("onDrawMessage", message)
+    if self:isInsideChat(message, messageOffset, self.config.spacings.name + self.config.fontSize + 1, self.canvas:size()) then
+      self.callbackPlugins("onDrawMessage", message, drawData)
+    end
   end
 
   self.recalculateHeight = nil

@@ -1,0 +1,3 @@
+[submodule "interface/StarboundTextboxInterface"]
+	path = interface/StarboundTextboxInterface
+	url = https://github.com/Mofurka/StarboundTextboxInterface
