@@ -66,7 +66,7 @@ function typing:buildTypingText(typingPlayers)
   local typingPlayerCount = #typingPlayerEntries
   local typingPlayerNames = {}
   for _, entry in ipairs(typingPlayerEntries) do
-    table.insert(typingPlayerNames, entry.name)
+    table.insert(typingPlayerNames, "" .. starcustomchat.utils.clearMetatags(entry.name))
   end
 
   if typingPlayerCount == 0 then
