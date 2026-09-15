@@ -164,7 +164,7 @@ function mainchat:formatIncomingMessage(message)
   elseif message.mode == "RadioMessage" then
     message.portrait = message.portrait or self.modeIcons.server
     message.nickname = message.nickname or "Server"
-  elseif message.mode == "Whisper" or message.mode == "Local" or message.mode == "Broadcast" or message.mode == "Party" or message.mode == "World" then
+  else
     if message.connection == 0 then
       message.portrait = message.portrait or self.modeIcons.server
       message.nickname = message.nickname or "Server"
