@@ -128,6 +128,9 @@
   "commands.openstarbound.identity": "Управляет настройками идентичности.",
   "commands.openstarbound.identity.set": "Устанавливает атрибуты идентичности.",
   "commands.openstarbound.identity.get": "Получает атрибуты идентичности.",
+  "commands.openstarbound.humanoidParameters": "Управляет параметрами гуманоидов.",
+  "commands.openstarbound.humanoidParameters.set": "Устанавливает параметры гуманоидов.",
+  "commands.openstarbound.humanoidParameters.get": "Получает параметры гуманоидов.",
   "commands.openstarbound.render": "Сгенерировать выбранное изображение в папке storage.",
 
   "commands.starcustomchat.clearchat": "Очищает историю чата.",

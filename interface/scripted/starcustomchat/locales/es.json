@@ -128,6 +128,9 @@
   "commands.openstarbound.identity": "Gestiona la configuración de identidad.",
   "commands.openstarbound.identity.set": "Establece atributos de identidad.",
   "commands.openstarbound.identity.get": "Obtiene atributos de identidad.",
+  "commands.openstarbound.humanoidParameters": "Gestiona los parámetros del humanoide.",
+  "commands.openstarbound.humanoidParameters.set": "Establece los parámetros del humanoide.",
+  "commands.openstarbound.humanoidParameters.get": "Obtiene los parámetros del humanoide.",
   "commands.openstarbound.render": "Renderiza varias partes del personaje y las guarda en la carpeta de almacenamiento.",
 
   "commands.starcustomchat.clearchat": "Limpia el historial del chat.",
