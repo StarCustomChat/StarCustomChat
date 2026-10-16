@@ -17,6 +17,7 @@ Custom chat provides you with several in-built functions like these:
  - Plugin system that allows you to expand the functionality even more!
 ![Full avatar mode](https://i.imgur.com/yLO8qWg.png)
 ![Short mode with disabled commands showcase](https://i.imgur.com/oXtXDp7.png)
+
 # Prerequirements
 This mod requires [OpenStarbound](https://github.com/OpenStarbound/OpenStarbound) 0.1.8+.
 
@@ -51,10 +52,6 @@ First, you need to create a server-specific patch for your own server and distri
 | Stickers                | /interface/scripted/starcustomchat/plugins/stickers/stickers.json.patch           | sendSticker                 | scc_add_message        |
 | Languages               | /interface/scripted/starcustomchat/plugins/languages/languages.json               | retrieveLanguages           | scc_rp_languages       |
 
-*The language file may now include a `transformation` section with a rules
-list, allowing servers to finely control how text degrades as characters
-learn a language.*
-
 The contains of the patch files are identical:
 
 ```diff
@@ -65,7 +62,7 @@ The contains of the patch files are identical:
 
 #### Stagehand scripts
 
-Since we only want to send the data and forgive about it, there's no need to spawn a long-living stagehand. Instead, we create a new stagehand with some data in its config.
+Since we only want to send the data and forget about it, there's no need to spawn a long-living stagehand. Instead, we create a new stagehand with some data in its config.
 For example, when we send the proximity chat message, we create a new stagehand with `stagehandType` type and the following data:
 
 ```json
@@ -146,8 +143,8 @@ If you don't want to create a whole plugin just to bring some commands to the pr
 # Contributors
 
 * @Degranon - main author
+* @Mofurka - StarboundTextboxInterface
 * @Novaenia - OpenStarbound support
-* @FezzedOne - xStarbound suppport
 
 ## Localization
 
