@@ -61,6 +61,7 @@ function StarCustomChat:create (canvasWid, backgroundCanvasWid, highlightCanvasW
   o.textBox = Textbox:setup("imgTextbox", {
     onChanged = textboxCallback,
     onEnterKey = textboxEnterKey,
+    withEnterCallbacks = true,
     onEscapeKey = escapeTextbox,
     scroll = {
       scrollEnabled = true,
