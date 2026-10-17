@@ -1002,7 +1002,8 @@ function sendMessageToBeSent(text, mode)
 
   local selectedInsertion = self.commandPreview:getSelectedInsertion(text)
 
-  if string.sub(text, 1, 1) == "/" and not string.find(text, "^/%w+%.png") then
+  if string.sub(text, 1, 1) == "/" and not string.find(text, "^/%w+%.png")
+    and not string.find(text, "^/opensb_data;") then
     if string.len(text) == 1 then
       self.recalledSentMessage = nil
       self.customChat:setText("")
@@ -1219,7 +1220,7 @@ end
 
 function saveEverythingDude()
   -- Save messages and last command
-  local messages = self.customChat:getMessages()
+  local messages = copy(self.customChat:getMessages())
   for _, message in ipairs(messages) do 
     self.runCallbackForPlugins("cleanMessage", message)
   end
@@ -1231,6 +1232,7 @@ function saveEverythingDude()
 end
 
 function closeChat()
+  self.runCallbackForPlugins("onChatClose")
   pane.hide()
 end
 

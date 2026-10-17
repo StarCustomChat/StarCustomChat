@@ -1,0 +1,12 @@
+{
+  "name": "Media",
+  "parameters": {
+    "maxImageSize": [64, 64],
+    "maxSoundDuration": 30,
+    "soundImages": {
+      "play": "/interface/scripted/starcustomchat/plugins/media/images/sound.png:play",
+      "stop": "/interface/scripted/starcustomchat/plugins/media/images/sound.png:stop"
+    }
+  },
+  "script": "/interface/scripted/starcustomchat/plugins/media/media.lua"
+}

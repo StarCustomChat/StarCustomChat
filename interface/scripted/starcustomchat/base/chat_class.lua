@@ -735,6 +735,14 @@ function StarCustomChat:setFonts(fontTable)
 end
 
 
+function StarCustomChat:drawMessageImage(message, position, scale, drawData)
+  self.canvas:drawImage(message.image, position, scale)
+  if message.imageSize then
+    drawData.imageRect = {position[1], position[2],
+      position[1] + message.imageSize[1] * scale, position[2] + message.imageSize[2] * scale}
+  end
+end
+
 function StarCustomChat:processQueue()
   self.canvas:clear()
   self.totalHeight = 0
@@ -765,12 +773,14 @@ function StarCustomChat:processQueue()
       )
 
 
-    local text = self.chatMode == "modern" and message.text 
+    local imageScale = message.imageScale or self.config.fontSize / 10
+    local bodyText = message.image and "" or message.text
+    local text = self.chatMode == "modern" and bodyText
       or createNameForCompactMode(message.displayName or message.nickname, 
         self.config.modeColors[messageMode] or self.config.modeColors.default, 
-        message.text, message.time, self:getColor("timetext"), self:getFont("timetext"))
+        bodyText, message.time, self:getColor("timetext"), self:getFont("timetext"))
 
-    if self.maxCharactersAllowed ~= 0 then
+    if not message.image and self.maxCharactersAllowed ~= 0 then
       local toCheckLength = message.collapsed == nil and true or message.collapsed
       text, message.isLong, message.collapsed = cutStringFromEnd(toCheckLength, text, self.maxCharactersAllowed)
       if toCheckLength then
@@ -778,10 +788,11 @@ function StarCustomChat:processQueue()
       end
     else
       message.collapsed = nil
+      message.isLong = nil
     end
 
     if not message.textHeight or self.recalculateHeight then
-      local sizeOfText = message.imageSize and vec2.div(message.imageSize, 10 / self.config.fontSize) or self:getTextSize(text)
+      local sizeOfText = message.imageSize and vec2.mul(message.imageSize, imageScale) or self:getTextSize(text)
 
       if not sizeOfText then return end 
 
@@ -825,7 +836,7 @@ function StarCustomChat:processQueue()
 
 
         if message.image then
-          self.canvas:drawImage(message.image, {nameOffset[1], messageOffset + drawData.bodyOffset}, 1 / 10 * self.config.fontSize)
+          self:drawMessageImage(message, {nameOffset[1], messageOffset + drawData.bodyOffset}, imageScale, drawData)
         else
           self.canvas:drawText(text, {
             position = {nameOffset[1], messageOffset + drawData.bodyOffset},
@@ -870,7 +881,7 @@ function StarCustomChat:processQueue()
           }, self.config.fontSize, message.color or self:getColor("chattext"), nil, self:getFont("chattext"))
 
           local nameWidth = self:getTextSize(text)
-          self.canvas:drawImage(message.image, {offset[1] + nameWidth[1], offset[2] + drawData.bodyOffset}, 1 / 10 * self.config.fontSize)
+          self:drawMessageImage(message, {offset[1] + nameWidth[1], offset[2] + drawData.bodyOffset}, imageScale, drawData)
         end
 
         if message.avatar then

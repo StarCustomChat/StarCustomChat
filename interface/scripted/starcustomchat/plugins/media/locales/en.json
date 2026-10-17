@@ -1,0 +1,7 @@
+{
+  "media.image_too_large": "Image not sent. Maximum dimensions: %s × %s pixels.",
+  "media.sound_too_long": "Audio not sent. Maximum duration: %s seconds.",
+  "media.play": "Play audio (%.1f s)",
+  "media.stop": "Stop audio",
+  "media.playback_error": "This audio could not be played."
+}
