@@ -54,7 +54,7 @@ function stickers:addSticker()
     return
   end
 
-  local newImage = "/assetmissing.png" .. directives
+  local newImage = starcustomchat.utils.imageFromDirectives(directives)
 
   local imageSize = starcustomchat.utils.safeImageSize(newImage)
   if imageSize then

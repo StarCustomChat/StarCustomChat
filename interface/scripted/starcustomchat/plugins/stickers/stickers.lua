@@ -75,8 +75,10 @@ end
 
 
 function stickers:onReceiveMessage(message)
-  if message and message.imageInteractive then return end
-  if message and (message.image and string.find(message.image, "^/%w+%.png"))
+  if not message or message.mediaType or message.imageInteractive then return end
+  local embeddedImage = type(sb.embedData) == "function" and message.image
+    and string.find(message.image, "^/opensb_data;")
+  if embeddedImage or (message.image and string.find(message.image, "^/%w+%.png"))
     or (message.text and string.find(message.text, "^/%w+%.png")) then
 
     local imageSize = starcustomchat.utils.safeImageSize(message.image or message.text)

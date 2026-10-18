@@ -238,17 +238,18 @@ function mainchat:addCustomImage(widgetName, data)
   local text = self.widget.getText("lytPortraitSelection.tbxCustomPortrait")
 
   if text ~= "" then
-    local imageSize = starcustomchat.utils.safeImageSize("/assetmissing.png" .. text)
+    local image = starcustomchat.utils.imageFromDirectives(text)
+    local imageSize = starcustomchat.utils.safeImageSize(image)
     if imageSize then
       if imageSize[1] <= 64 and imageSize[2] <= 64 then
 
         if self.portraitSelectionMode == "portraits" then
-          table.insert(self.customPortraits, "/assetmissing.png" .. text)
+          table.insert(self.customPortraits, image)
           self.selectedPortrait = #self.customPortraits
           player.setProperty("icc_custom_portrait_selected", #self.customPortraits)
         else -- if self.portraitSelectionMode == "frames" then
           local portraitUuid = sb.makeUuid()
-          self.customFrames[portraitUuid] = "/assetmissing.png" .. text
+          self.customFrames[portraitUuid] = image
           root.setConfiguration("scc_custom_frames", self.customFrames)
         end
         self:populatePortraitList(self.portraitSelectionMode)
