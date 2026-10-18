@@ -1,5 +1,5 @@
 require "/interface/scripted/starcustomchat/plugin.lua"
-require "/interface/scripted/starcustomchat/plugins/media/metadata.lua"
+require "/interface/scripted/starcustomchat/plugins/media/scripts/metadata.lua"
 require "/scripts/rect.lua"
 
 media = PluginClass:new({name = "media"})
@@ -33,7 +33,8 @@ function media:getMedia(message, text)
   text = text or message.text
   local cached = self.cache[message]
   if not cached or cached.text ~= text then
-    local ok, value, reason = pcall(SCCMediaMetadata.inspect, text, self.maxImageSize, self.maxSoundDuration)
+    local ok, value, reason = pcall(SCCMediaMetadata.inspect, text, self.maxImageSize, self.maxSoundDuration,
+      self.maxGifFrames, self.maxGifDuration)
     cached = {text = text, value = ok and value or false, reason = ok and reason or nil}
     self.cache[message] = cached
   end
@@ -46,6 +47,12 @@ function media:preventTextboxCallback(message)
     starcustomchat.utils.alert("media.image_too_large", self.maxImageSize[1], self.maxImageSize[2])
   elseif reason == "sound_too_long" then
     starcustomchat.utils.alert("media.sound_too_long", self.maxSoundDuration)
+  elseif reason == "gif_too_many_frames" then
+    starcustomchat.utils.alert("media.gif_too_many_frames", self.maxGifFrames)
+  elseif reason == "gif_too_long" then
+    starcustomchat.utils.alert("media.gif_too_long", self.maxGifDuration)
+  elseif reason == "gif_invalid" then
+    starcustomchat.utils.alert("media.gif_invalid")
   else
     return false
   end
@@ -65,7 +72,10 @@ function media:setMessageImage(message, text)
   local image, size, scale, interactive
   if data and data.kind == "image" then
     image, size, scale = data.path, data.size, 1
-  elseif data and self.soundButtons.play and self.soundButtons.stop then
+  elseif data and data.kind == "animation" then
+    image = data.frames[data.frame or 1].path or "/assetmissing.png?multiply=ffffff00"
+    size, scale = data.size, 1
+  elseif data and data.kind == "sound" and self.soundButtons.play and self.soundButtons.stop then
     local playing = self.playing and self.playing.message == message
     local button = self.soundButtons[playing and "stop" or "play"]
     image, size, interactive = button.image, button.size, true
@@ -175,19 +185,78 @@ function media:onCreateTooltip(screenPosition)
 end
 
 function media:update(dt)
-  if not self.playing then return end
-  self.playing.remaining = self.playing.remaining - dt
-  local present = false
-  for _, message in ipairs(self.customChat.messages) do
-    if message == self.playing.message and message.text == self.playing.text then
-      present = true
-      break
+  local redraw = false
+  local displayed = not pane.isDisplayed or pane.isDisplayed()
+  if self.playing then
+    self.playing.remaining = self.playing.remaining - dt
+    local present = false
+    for _, message in ipairs(self.customChat.messages) do
+      if message == self.playing.message and message.text == self.playing.text then
+        present = true
+        break
+      end
+    end
+    if self.playing.remaining <= 0 or not present or not displayed then
+      self:stopSound()
+      redraw = true
     end
   end
-  if self.playing.remaining <= 0 or not present or (pane.isDisplayed and not pane.isDisplayed()) then
-    self:stopSound()
-    self.customChat:processQueue()
+
+  -- Decode at most one bounded GIF batch per update, sharing work between visible
+  -- messages. Pause playback when the next frame has not been prepared yet.
+  if displayed then
+    local chat = self.customChat
+    local spacing = chat.config.spacings.name + chat.config.fontSize + 1
+    local animations, pending, firstFrame = {}, {}
+    for _, index in ipairs(chat.drawnMessageIndexes or {}) do
+      local message = chat.messages[index]
+      if message and message.mediaType == "animation" and message.offset
+        and chat:isInsideChat(message, message.offset, spacing, chat.canvas:size()) then
+        local data = self:getMedia(message)
+        if data and data.kind == "animation" then
+          local entry = {message = message, data = data}
+          animations[#animations + 1] = entry
+          if data.pending then
+            pending[#pending + 1] = entry
+            if data.readyFrames == 0 then firstFrame = entry end
+          end
+        end
+      end
+    end
+    if #pending > 0 then
+      self.decodeIndex = (self.decodeIndex or 0) % #pending + 1
+      local entry = firstFrame or pending[self.decodeIndex]
+      if not SCCMediaGif.step(entry.data) then
+        self.cache[entry.message].value, self.cache[entry.message].reason = false, "gif_invalid"
+        self:cleanMessage(entry.message)
+        redraw = true
+      end
+    end
+    for _, entry in ipairs(animations) do
+      local message, data = entry.message, entry.data
+      if not data.failed and data.readyFrames > 0 then
+        local elapsed = (data.elapsed or 0) + dt
+        local frame = #data.frames
+        if data.plays == 0 or elapsed < data.duration * data.plays then
+          local phase = elapsed % data.duration
+          local low, high = 1, #data.frames
+          while low < high do
+            local middle = (low + high) // 2
+            if phase < data.frames[middle].endsAt then high = middle else low = middle + 1 end
+          end
+          frame = low
+        end
+        if data.frames[frame].path then
+          data.frame, data.elapsed = frame, elapsed
+        end
+        -- The first ready frame replaces the transparent loading placeholder.
+        local image = data.frames[data.frame or 1].path
+        if message.image ~= image then message.image, redraw = image, true end
+      end
+    end
   end
+  -- Frame sizes are constant, so retain layout and redraw only once.
+  if redraw then self.customChat:processQueue() end
 end
 
 function media:onSettingsUpdate()

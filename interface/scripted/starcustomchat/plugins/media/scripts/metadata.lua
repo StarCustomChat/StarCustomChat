@@ -1,5 +1,7 @@
 -- Read media metadata without starting audio playback. All entry points are
 -- called through pcall by media.lua because chat data may be malformed.
+require "/interface/scripted/starcustomchat/plugins/media/scripts/gif.lua"
+
 SCCMediaMetadata = {}
 
 local compression = {none = true, zlib = true, gzip = true, zstd = true}
@@ -123,12 +125,17 @@ local function oggDuration(data)
   return duration
 end
 
-function SCCMediaMetadata.inspect(text, maxImageSize, maxSoundDuration)
+function SCCMediaMetadata.inspect(text, maxImageSize, maxSoundDuration, maxGifFrames, maxGifDuration)
   local path, base, suffix = SCCMediaMetadata.path(text)
   if not path then return end
   -- Explicitly allow embedded bytes for metadata only; never execute them.
   -- This also respects the engine's safe.allowRemoteAssets setting.
   local data = root.assetData(base, true)
+  if data:sub(1, 6) == "GIF87a" or data:sub(1, 6) == "GIF89a" then
+    -- A GIF carries its own frames; asset frame selectors/directives do not apply.
+    if suffix ~= "" or not base:match("^/opensb_data;bin;") then return nil, "gif_invalid" end
+    return SCCMediaGif.inspect(data, maxImageSize, maxGifFrames, maxGifDuration)
+  end
   if data:sub(1, 8) == "\137PNG\13\10\26\10" then
     if #data < 33 or data:sub(13, 16) ~= "IHDR" then return end
     local width, height = string.unpack(">I4I4", data, 17)

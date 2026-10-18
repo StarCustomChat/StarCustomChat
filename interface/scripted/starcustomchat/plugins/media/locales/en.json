@@ -3,5 +3,8 @@
   "media.sound_too_long": "Audio not sent. Maximum duration: %s seconds.",
   "media.play": "Play audio (%.1f s)",
   "media.stop": "Stop audio",
-  "media.playback_error": "This audio could not be played."
+  "media.playback_error": "This audio could not be played.",
+  "media.gif_too_many_frames": "GIF not sent. Maximum number of frames: %s.",
+  "media.gif_too_long": "GIF not sent. Maximum duration per cycle: %s seconds.",
+  "media.gif_invalid": "GIF not sent. This GIF is damaged or uses unsupported features."
 }

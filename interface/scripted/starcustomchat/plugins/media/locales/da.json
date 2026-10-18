@@ -3,5 +3,8 @@
   "media.sound_too_long": "Audio niet verzonden. Maximale duur: %s seconden.",
   "media.play": "Audio afspelen (%.1f s)",
   "media.stop": "Audio stoppen",
-  "media.playback_error": "Deze audio kon niet worden afgespeeld."
+  "media.playback_error": "Deze audio kon niet worden afgespeeld.",
+  "media.gif_too_many_frames": "GIF niet verzonden. Maximaal aantal frames: %s.",
+  "media.gif_too_long": "GIF niet verzonden. Maximale duur per cyclus: %s seconden.",
+  "media.gif_invalid": "GIF niet verzonden. Deze GIF is beschadigd of gebruikt niet-ondersteunde functies."
 }
