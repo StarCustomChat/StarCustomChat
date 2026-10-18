@@ -1,4 +1,5 @@
 {
+    "settings.plugins.charactervoice.embeddedSound": "Eingebettetes Audio",
     "settings.plugins.charactervoice": "Stimme",
     "settings.plugins.charactervoice.enable": "Aktiviert",
     "settings.plugins.charactervoice.enablewhisper": "Privatchat",

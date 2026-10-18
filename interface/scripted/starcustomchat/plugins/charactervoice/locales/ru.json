@@ -1,4 +1,5 @@
 {
+    "settings.plugins.charactervoice.embeddedSound": "Встроенный звук",
     "settings.plugins.charactervoice": "Голос персонажа",
     "settings.plugins.charactervoice.enable": "Включить",
     "settings.plugins.charactervoice.enablewhisper": "Голос при ЛС",
