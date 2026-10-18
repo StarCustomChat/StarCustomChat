@@ -1,4 +1,5 @@
 ## Bugfixes
+Fixed a rare carsh on deleting messages.
 
 ## Features
 Added the humanoidParameters command preview.

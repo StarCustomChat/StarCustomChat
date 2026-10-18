@@ -610,6 +610,7 @@ end
 
 
 function StarCustomChat:highlightMessage(message, color)
+  if not message then return end
   for i = #self.drawnMessageIndexes, 1, -1 do 
     if message.uuid == self.messages[self.drawnMessageIndexes[i]].uuid then
       local y1, y2 = message.offset, message.offset + message.height + self.config.spacings.messages
