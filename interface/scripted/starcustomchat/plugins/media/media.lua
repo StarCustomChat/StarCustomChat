@@ -53,6 +53,13 @@ function media:preventTextboxCallback(message)
   return true
 end
 
+function media:formatOutcomingMessage(message)
+  if self:getMedia(message) then
+    message.silent = true
+  end
+  return message
+end
+
 function media:setMessageImage(message, text)
   local data = self:getMedia(message, text)
   local image, size, scale, interactive
