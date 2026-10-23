@@ -132,11 +132,10 @@ function init()
 
   if currentMessageMode then
     widget.setSelectedOption("rgChatMode", currentMessageMode)
-    widget.setFontColor("rgChatMode." .. currentMessageMode, chatConfig.modeColors[widget.getData("rgChatMode." .. currentMessageMode).mode])
   else
     widget.setSelectedOption("rgChatMode", 1)
-    widget.setFontColor("rgChatMode.1", chatConfig.modeColors[widget.getData("rgChatMode.1").mode])
   end
+  refreshModeColors()
 
   createPromiseFunction()
 
@@ -325,6 +324,7 @@ function registerCallbacks()
     
     localeChat()
     self.customChat:resetChat()
+    refreshModeColors()
   end))
 
   starcustomchat.utils.setMessageHandler( "scc_clear_history", localHandler(function(data)
@@ -1114,12 +1114,18 @@ function sendMessage(message)
   self.customChat:sendMessage(message)
 end
 
-function setMode(id, data)
+function refreshModeColors(selectedMode)
+  -- Click callbacks pass the button name as a string; configured IDs are numbers.
+  selectedMode = tonumber(selectedMode) or widget.getSelectedOption("rgChatMode")
   local modeButtons = config.getParameter("gui")["rgChatMode"]["buttons"]
-  for i, btn in ipairs(modeButtons) do
-    widget.setFontColor("rgChatMode." .. i, self.customChat.config.unselectedModeColor)
+  for _, btn in ipairs(modeButtons) do
+    widget.setFontColor("rgChatMode." .. btn.id, btn.id == selectedMode
+      and self.customChat:getModeColor(btn.data.mode) or self.customChat.config.unselectedModeColor)
   end
-  widget.setFontColor("rgChatMode." .. id, self.customChat.config.modeColors[data.mode])
+end
+
+function setMode(id, data)
+  refreshModeColors(id)
 
   self.runCallbackForPlugins("onModeChange", data.mode)
   root.setConfiguration("scc_message_mode", id)
@@ -1138,6 +1144,7 @@ function openSettings()
   Configuration:save()
   local chatConfigInterface = self.settingsInterface
   chatConfigInterface.enabledPlugins = config.getParameter("enabledPlugins", {})
+  chatConfigInterface.chatModes = config.getParameter("chatModes", {})
   chatConfigInterface.chatConfig = self.customChat.config
   chatConfigInterface.localizationTable = starcustomchat.locale
 

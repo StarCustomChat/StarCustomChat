@@ -1,4 +1,5 @@
 {
+    "settings.colors.mode": "Mode : %s",
     "settings.plugins.colors": "Couleurs",
     "settings.colors.drop_to_default": "Par défaut",
     "settings.colors.chattext": "Police du Chat",

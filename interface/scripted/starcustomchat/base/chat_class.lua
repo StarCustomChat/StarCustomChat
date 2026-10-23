@@ -175,6 +175,12 @@ function StarCustomChat:getColor(type)
   return self.colorTable[type] and "#" .. self.colorTable[type] or self.config.defaultColor
 end
 
+function StarCustomChat:getModeColor(mode)
+  local customColor = self.colorTable["mode." .. (mode or "default")]
+  return customColor and "#" .. customColor
+    or self.config.modeColors[mode] or self.config.modeColors.default
+end
+
 function StarCustomChat:calculateUUID(message)
   return util.hashString(message.connection .. (message.text or ""))
 end
@@ -778,7 +784,7 @@ function StarCustomChat:processQueue()
     local bodyText = message.image and "" or message.text
     local text = self.chatMode == "modern" and bodyText
       or createNameForCompactMode(message.displayName or message.nickname, 
-        self.config.modeColors[messageMode] or self.config.modeColors.default, 
+        self:getModeColor(messageMode),
         bodyText, message.time, self:getColor("timetext"), self:getFont("timetext"))
 
     if not message.image and self.maxCharactersAllowed ~= 0 then
@@ -852,7 +858,7 @@ function StarCustomChat:processQueue()
         if message.avatar then
           local offset = {0, messageOffset + self.config.textOffsetFullMode[2] + messageBodyHeight - self.config.fontSize}
           message.avatarOffset = offset
-          self:drawIcon(message.portrait, message.displayName or message.nickname, offset, self.config.modeColors[messageMode], 
+          self:drawIcon(message.portrait, message.displayName or message.nickname, offset, self:getModeColor(messageMode),
             message.time, message.recipient)
         end
       end
@@ -871,7 +877,7 @@ function StarCustomChat:processQueue()
 
         else
           local text = createNameForCompactMode(message.displayName or message.nickname, 
-          self.config.modeColors[messageMode] or self.config.modeColors.default, 
+          self:getModeColor(messageMode),
             "", message.time, self:getColor("timetext"), self:getFont("timetext"))
           
           self.canvas:drawText(text, {
@@ -888,7 +894,7 @@ function StarCustomChat:processQueue()
         if message.avatar then
           local squareSize = self.config.modeIndicatorSize
           local iconOffset = vec2.add(offset, {-1, message.height + self.config.spacings.name - 1})
-          self.canvas:drawRect({iconOffset[1], iconOffset[2], iconOffset[1] + squareSize, iconOffset[2] - self.config.fontSize + 2}, self.config.modeColors[messageMode])
+          self.canvas:drawRect({iconOffset[1], iconOffset[2], iconOffset[1] + squareSize, iconOffset[2] - self.config.fontSize + 2}, self:getModeColor(messageMode))
         end
       end
     end

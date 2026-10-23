@@ -1,4 +1,5 @@
 {
+    "settings.colors.mode": "Mode: %s",
     "settings.plugins.colors": "Colors",
     "settings.colors.drop_to_default": "Default",
     "settings.colors.chattext": "Chat text",

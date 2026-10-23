@@ -2,6 +2,7 @@
 Fixed a rare carsh on deleting messages.
 
 ## Features
+Added per-mode colors in the Colors plugin for message indicators, compact sender names, and selected chat tabs, including plugin modes.
 Added the humanoidParameters command preview.
 Added the media plugin for embedded GIFs, images and audio, with configurable size and duration limits, localized validation before sending, and Play/Stop controls.
 Added embedded image support for custom portraits, frames, and stickers on supported OpenStarbound versions.

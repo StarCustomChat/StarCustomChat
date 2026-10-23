@@ -68,8 +68,31 @@ function clickEvent(c, _, button, isDown)
     end
 end
 
+-- Starbound's named colors differ from the standard web colors.
+local namedColors = {
+    red = "FF4942", orange = "FFB42F", yellow = "FFEF1E", green = "4FE646",
+    blue = "2660FF", indigo = "4B0082", violet = "A077FF", black = "000000",
+    white = "FFFFFF", magenta = "DD5CF9", darkmagenta = "8E2190", cyan = "00DCE9",
+    darkcyan = "0089A5", cornflowerblue = "6495ED", gray = "A0A0A0",
+    lightgray = "C0C0C0", darkgray = "808080", darkgreen = "008000",
+    pink = "FFA2BB", clear = "00000000"
+}
+
+function toHex(color)
+    if type(color) == "table" then
+        return ("%02x%02x%02x%02x"):format(color[1], color[2], color[3], color[4] or 255)
+    end
+    local hex = namedColors[color:lower()] or color:gsub("^#", "")
+    if #hex == 3 or #hex == 4 then
+        hex = hex:gsub(".", "%0%0")
+    end
+    if #hex == 6 then hex = hex .. "FF" end
+    return hex
+end
+
 function setColor(c, newColor)
     if newColor then
+        newColor = toHex(newColor)
         local col, al
         if string.len(newColor) == 8 then
             col = tonumber(string.sub(newColor, 1, 6), 16)
@@ -82,13 +105,20 @@ function setColor(c, newColor)
         c.selected_alpha = al
         c.alpha_mouse = {alpha_size[1] * (al / 255), alpha_size[2] // 2}
 
-        -- Then, find the color
-        for x, line in ipairs(spectrum_data) do 
-            for y, value in ipairs(spectrum_data[x]) do 
-                if value == col then
-                    c.selected = value
-                    c.color_mouse = {x,y + alpha_size[2] + 1}
-                    return
+        -- Preserve the exact color, even when the chart has no matching pixel.
+        c.selected = col
+        local closestDistance = math.huge
+        for x = 0, img_size[1] - 1 do
+            for y = 0, spectrum_size[2] - 1 do
+                local value = spectrum_data[x][y]
+                local dr = getByte(value, 2) - getByte(col, 2)
+                local dg = getByte(value, 1) - getByte(col, 1)
+                local db = getByte(value, 0) - getByte(col, 0)
+                local distance = dr * dr + dg * dg + db * db
+                if distance < closestDistance then
+                    closestDistance = distance
+                    c.color_mouse = {x, y + alpha_size[2]}
+                    if distance == 0 then return end
                 end
             end
         end
