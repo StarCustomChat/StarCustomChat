@@ -11,7 +11,7 @@
   "steamContentId" : "3208917628",
   "steamDescription" : "[b]StarCustomChat[/b] is an overwhole mod that rewrites the way chat works in Starbound. \nInstead of a boring, plain text you can now have:\n\n* Two modes inspired by Discord: the compact one and the avatar showcase\n* Plugin and localisation system that allows you to enrich the experience for your own server by adding more functionality to the chat\n* Chat size and color configuration\n* Quick and easy DM panels\n* And many more!\n\nThis mod is client-sided, meaning that you don't have to install it on a server to use. And of course, this is fully compatible with the vanilla game - you will still receive all the messages from people who don't have this mod installed, and they will receive yours.\n\nRequires [url=https://github.com/OpenStarbound/OpenStarbound]OpenStarbound[/url] 0.1.8+.\n\nFor questions, bug reports and suggestions please go to my discord server: [url=https://discord.gg/YRYS3ajZcQ][img]https://i.imgur.com/Yrqln75.png[/img][/url]",
   "tags" : "User Interface",
-  "version" : "2.0.0",
+  "version" : "2.1.0",
   "scripts": {
     "postLoad": [
       "/scripts/commandfetcher/commandfetcher.lua"
