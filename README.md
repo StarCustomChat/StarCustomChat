@@ -1,4 +1,4 @@
-# Custom chat
+# Star Custom Chat
 Starbound mod for replacing an old and boring chat with a flashy new and customazible piece of experience.
 Brought to you with love by Degranon
 
