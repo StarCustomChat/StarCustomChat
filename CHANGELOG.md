@@ -1,5 +1,6 @@
 ## Bugfixes
 Fixed a rare carsh on deleting messages.
+Fixed the rectangualar avatars pop out of the preview frames.
 
 ## Features
 Added per-mode colors in the Colors plugin for message indicators, compact sender names, and selected chat tabs, including plugin modes.
