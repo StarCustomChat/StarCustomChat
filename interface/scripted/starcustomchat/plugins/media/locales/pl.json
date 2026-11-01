@@ -1,0 +1,10 @@
+{
+  "media.image_too_large": "Obraz nie został wysłany. Maksymalne wymiary: %s × %s pikseli.",
+  "media.sound_too_long": "Dźwięk nie został wysłany. Maksymalny czas trwania: %s s.",
+  "media.play": "Odtwórz dźwięk (%.1f s)",
+  "media.stop": "Zatrzymaj dźwięk",
+  "media.playback_error": "Nie udało się odtworzyć tego dźwięku.",
+  "media.gif_too_many_frames": "Nie wysłano GIF-a. Maksymalna liczba klatek: %s.",
+  "media.gif_too_long": "Nie wysłano GIF-a. Maksymalny czas trwania jednego cyklu: %s sekund.",
+  "media.gif_invalid": "Nie wysłano GIF-a. Ten GIF jest uszkodzony lub używa nieobsługiwanych funkcji."
+}

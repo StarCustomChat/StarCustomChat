@@ -1,4 +1,5 @@
 {
+    "settings.colors.mode": "Режим: %s",
     "settings.plugins.colors": "Кольори",
     "settings.colors.drop_to_default": "Стандартний",
     "settings.colors.chattext": "Текст чату",

@@ -128,6 +128,9 @@
   "commands.openstarbound.identity": "Modifica le impostazioni di identità del personaggio.",
   "commands.openstarbound.identity.set": "Imposta attributi identità del personaggio.",
   "commands.openstarbound.identity.get": "Ricevi attributi identità del personaggio.",
+  "commands.openstarbound.humanoidParameters": "Gestisce i parametri dell'umanoide.",
+  "commands.openstarbound.humanoidParameters.set": "Imposta i parametri dell'umanoide.",
+  "commands.openstarbound.humanoidParameters.get": "Mostra i parametri dell'umanoide.",
   "commands.openstarbound.render": "Renderizza parti del personaggio e salva negli Appunti.",
 
   "commands.starcustomchat.clearchat": "Cancella la cronologia della chat.",

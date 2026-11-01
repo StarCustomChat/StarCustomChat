@@ -129,6 +129,9 @@
   "commands.openstarbound.identity": "Öffnet Identity-Einstellungen.",
   "commands.openstarbound.identity.set": "Legt Identity-Attribute fest.",
   "commands.openstarbound.identity.get": "Gibt Identity-Attribute aus.",
+  "commands.openstarbound.humanoidParameters": "Verwaltet Humanoid-Parameter.",
+  "commands.openstarbound.humanoidParameters.set": "Legt Humanoid-Parameter fest.",
+  "commands.openstarbound.humanoidParameters.get": "Gibt Humanoid-Parameter aus.",
   "commands.openstarbound.render": "Rendert Teile des Charakters und speichert sie im Storage-Ordner.",
 
   "commands.starcustomchat.clearchat": "Löscht Chatverlauf.",

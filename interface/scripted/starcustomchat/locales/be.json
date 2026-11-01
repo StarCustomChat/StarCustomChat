@@ -128,6 +128,9 @@
   "commands.openstarbound.identity": "Кіруе наладамі ідэнтычнасці.",
   "commands.openstarbound.identity.set": "Устанаўлівае параметры ідэнтычнасці.",
   "commands.openstarbound.identity.get": "Атрымлівае параметры ідэнтычнасці.",
+  "commands.openstarbound.humanoidParameters": "Кіруе параметрамі гуманоідаў.",
+  "commands.openstarbound.humanoidParameters.set": "Усталёўвае параметры гуманоідаў.",
+  "commands.openstarbound.humanoidParameters.get": "Атрымлівае параметры гуманоідаў.",
   "commands.openstarbound.render": "Рэндэрыць розныя часткі персанажа і захоўвае іх у тэчцы сховішча.",
 
   "commands.starcustomchat.clearchat": "Ачышчае гісторыю чата.",

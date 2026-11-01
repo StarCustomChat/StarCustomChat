@@ -128,6 +128,9 @@
   "commands.openstarbound.identity": "Керувати налаштуваннями ідентичності.",
   "commands.openstarbound.identity.set": "Встановити атрибути ідентичності.",
   "commands.openstarbound.identity.get": "Отримати атрибути ідентичності.",
+  "commands.openstarbound.humanoidParameters": "Керувати параметрами гуманоїдів.",
+  "commands.openstarbound.humanoidParameters.set": "Встановити параметри гуманоїдів.",
+  "commands.openstarbound.humanoidParameters.get": "Отримати параметри гуманоїдів.",
   "commands.openstarbound.render": "Відібразити різні частини персонажа та скопіювати у буфер обміну.",
 
   "commands.starcustomchat.clearchat": "Очистити історію чату.",

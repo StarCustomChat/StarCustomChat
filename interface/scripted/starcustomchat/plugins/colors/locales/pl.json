@@ -1,4 +1,5 @@
 {
+    "settings.colors.mode": "Tryb: %s",
     "settings.plugins.colors": "Kolory",
     "settings.colors.drop_to_default": "Reset",
     "settings.colors.chattext": "Tekst czatu",

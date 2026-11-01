@@ -75,7 +75,10 @@ end
 
 
 function stickers:onReceiveMessage(message)
-  if message and (message.image and string.find(message.image, "^/%w+%.png"))
+  if not message or message.mediaType or message.imageInteractive then return end
+  local embeddedImage = type(sb.embedData) == "function" and message.image
+    and string.find(message.image, "^/opensb_data;")
+  if embeddedImage or (message.image and string.find(message.image, "^/%w+%.png"))
     or (message.text and string.find(message.text, "^/%w+%.png")) then
 
     local imageSize = starcustomchat.utils.safeImageSize(message.image or message.text)
@@ -92,19 +95,21 @@ end
 
 function stickers:onCreateTooltip(screenPosition)
   local selectedMessage = self.customChat:selectMessage(screenPosition)
-  if selectedMessage and selectedMessage.image then
+  if selectedMessage and selectedMessage.image and not selectedMessage.mediaType and not selectedMessage.imageInteractive then
     return starcustomchat.utils.getTranslation("stickers.name_preview", selectedMessage.text)
   end
 end
 
 function stickers:contextMenuButtonFilter(buttonName, screenPosition, selectedMessage)
   if selectedMessage and buttonName == "save_sticker" then
-    return selectedMessage.image and not self.savedStickers[selectedMessage.text]
+    return selectedMessage.image and not selectedMessage.mediaType and not selectedMessage.imageInteractive
+      and not self.savedStickers[selectedMessage.text]
   end
 end
 
 function stickers:contextMenuButtonClick(buttonName, selectedMessage)
-  if selectedMessage and buttonName == "save_sticker" and selectedMessage.image then
+  if selectedMessage and buttonName == "save_sticker" and selectedMessage.image
+    and not selectedMessage.mediaType and not selectedMessage.imageInteractive then
     local name = selectedMessage.text
     if name then
       if self.savedStickers[name] then

@@ -1,0 +1,10 @@
+{
+  "media.image_too_large": "Immagine non inviata. Dimensioni massime: %s × %s pixel.",
+  "media.sound_too_long": "Audio non inviato. Durata massima: %s secondi.",
+  "media.play": "Riproduci audio (%.1f s)",
+  "media.stop": "Interrompi audio",
+  "media.playback_error": "Impossibile riprodurre questo audio.",
+  "media.gif_too_many_frames": "GIF non inviata. Numero massimo di fotogrammi: %s.",
+  "media.gif_too_long": "GIF non inviata. Durata massima per ciclo: %s secondi.",
+  "media.gif_invalid": "GIF non inviata. Questa GIF è danneggiata o utilizza funzionalità non supportate."
+}

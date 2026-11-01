@@ -1,4 +1,5 @@
 {
+    "settings.plugins.charactervoice.embeddedSound": "Ingesloten audio",
     "settings.plugins.charactervoice": "Karakterstem",
     "settings.plugins.charactervoice.enable": "Actief",
     "settings.plugins.charactervoice.enablewhisper": "Privéstem",

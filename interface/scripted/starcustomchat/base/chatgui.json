@@ -513,7 +513,8 @@
   },
   "scriptWidgetCallbacks": ["setMode", "modeToggle", "toBottom", "openSettings", "selectPlayer", 
     "customButtonCallback", "contextMenuButtonClick", "closeChat", "toggleChatMovement", "toggleChatResize", "scrollLeftMenuUp", "scrollLeftMenuDown", 
-    "closeSubMenu", "customButtonCallback2", "customButtonCallback3"
+    "closeSubMenu", "customButtonCallback2", "customButtonCallback3",
+    "__tbxEnterKey"
   ],
   "canvasClickCallbacks" : {
     "cnvHighlightCanvas" : "canvasClickEvent"

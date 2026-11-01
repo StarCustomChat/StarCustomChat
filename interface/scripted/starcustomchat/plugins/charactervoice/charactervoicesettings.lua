@@ -68,15 +68,46 @@ function charactervoice:openTab()
     self.comboboxes["btnCustomSound" .. ind] = self:createCombobox(soundList, ind)
 
     local sound = self.customSoundsTable[i] or ""
-    self.widget.setText("btnCustomSound" .. ind, sound:match("([^/]+)$") or "")
+    self.widget.setText("btnCustomSound" .. ind, self:soundLabel(sound))
     self.widget.setButtonEnabled("btnRemove" .. ind, sound and sound ~= "")
   end
   
   self:populateScrollArea(self.allRaceSounds, self.selectedSpecies)
 end
 
+function charactervoice:soundLabel(sound)
+  if sound:sub(1, 13) == "/opensb_data;" then
+    return starcustomchat.utils.getTranslation("settings.plugins.charactervoice.embeddedSound")
+  end
+  return sound:match("([^/]+)$") or ""
+end
+
+function charactervoice:onLocaleChange()
+  for i = 1, 3 do
+    self.widget.setText("btnCustomSound" .. i, self:soundLabel(self.customSoundsTable[i] or ""))
+  end
+end
+
+local EmbeddedSoundCombobox = setmetatable({}, {__index = Combobox})
+
+function EmbeddedSoundCombobox:fillValues(searchText, defaultValue)
+  if searchText and type(sb.embedData) == "function" and searchText:sub(1, 13) == "/opensb_data;" then
+    -- Render the pasted sound as a single selectable row.
+    local values, keys = self.values, self.keys
+    self.values = {embedded = {
+      name = starcustomchat.utils.getTranslation("settings.plugins.charactervoice.embeddedSound"),
+      data = {soundPath = searchText}
+    }}
+    self.keys = {"embedded"}
+    Combobox.fillValues(self, nil, defaultValue)
+    self.values, self.keys = values, keys
+  else
+    Combobox.fillValues(self, searchText, defaultValue)
+  end
+end
+
 function charactervoice:createCombobox(soundList, ind)
-  return Combobox:bind(self.layoutWidget .. "." .. "btnCustomSound" .. ind, soundList, function(sound, data)
+  return EmbeddedSoundCombobox:bind(self.layoutWidget .. "." .. "btnCustomSound" .. ind, soundList, function(sound, data)
     self:saveCustomSound(sound, data, ind)
   end, {
     filter = true,
@@ -143,11 +174,12 @@ end
 
 function charactervoice:saveCustomSound(sound, data, ind)
   ind = tonumber(ind)
-  local customSound = data.displayPlainText or sound
+  local customSound = data.soundPath or data.displayPlainText or sound
 
   if customSound and customSound ~= "" then
-    self.widget.setText("btnCustomSound" .. ind, customSound:match("([^/]+)$"))
-    if root.assetOrigin(customSound) then
+    local embedded = customSound:sub(1, 13) == "/opensb_data;"
+    if (embedded and type(sb.embedData) == "function") or (not embedded and root.assetOrigin(customSound)) then
+      self.widget.setText("btnCustomSound" .. ind, self:soundLabel(customSound))
       self.customSoundsTable[ind] = customSound
       self.soundsPool = {customSound}
       self:playSound()

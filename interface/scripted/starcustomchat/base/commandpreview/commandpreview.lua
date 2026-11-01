@@ -67,7 +67,8 @@ function CommandPreview:getPingPlayers()
 end
 
 function CommandPreview:getEntries(text)
-  if utf8.len(text) > 2 and string.sub(text, 1, 1) == "/" then
+  if utf8.len(text) > 2 and string.sub(text, 1, 1) == "/"
+    and not string.find(text, "^/opensb_data;") then
     self.pingUsersAround = nil
     return starcustomchat.utils.getCommands(self.availableCommands, text)
   elseif utf8.len(text) >= 1 and string.sub(text, 1, 1) == "@" then

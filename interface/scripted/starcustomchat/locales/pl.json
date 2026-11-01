@@ -128,6 +128,9 @@
   "commands.openstarbound.identity": "Zarządza ustawieniami tożsamości.",
   "commands.openstarbound.identity.set": "Ustawia atrybuty tożsamości.",
   "commands.openstarbound.identity.get": "GPokazuje atrybuty tożsamości.",
+  "commands.openstarbound.humanoidParameters": "Zarządza parametrami humanoida.",
+  "commands.openstarbound.humanoidParameters.set": "Ustawia parametry humanoida.",
+  "commands.openstarbound.humanoidParameters.get": "Wyświetla parametry humanoida.",
   "commands.openstarbound.render": "Renderuje różne części postaci i kopiuje je do folderu 'storage'.",
 
   "commands.starcustomchat.clearchat": "Czyści historię czatu.",

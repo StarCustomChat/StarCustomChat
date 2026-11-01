@@ -1,4 +1,5 @@
 {
+    "settings.plugins.charactervoice.embeddedSound": "Áudio incorporado",
     "settings.plugins.charactervoice": "Voz do Personagem",
     "settings.plugins.charactervoice.enable": "Ativado",
     "settings.plugins.charactervoice.enablewhisper": "Som de Mensagem Direta",

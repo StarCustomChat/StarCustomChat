@@ -198,6 +198,15 @@ function starcustomchat.utils.drawCircle(center, radius, color, sections)
   end
 end
 
+function starcustomchat.utils.imageFromDirectives(directives)
+  if type(directives) ~= "string" or directives == "" then return end
+  if directives:sub(1, 13) == "/opensb_data;" then
+    if type(sb.embedData) == "function" then return directives end
+    return nil
+  end
+  return "/assetmissing.png" .. directives
+end
+
 function starcustomchat.utils.safeImageSize(image)
   if image and type(image) == "string" and image ~= "" then
     local imageSize

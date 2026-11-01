@@ -128,6 +128,9 @@
   "commands.openstarbound.identity": "Beheert identiteitsinstellingen.",
   "commands.openstarbound.identity.set": "Stelt identiteitsattributen in.",
   "commands.openstarbound.identity.get": "Geeft identiteitsattributen weer.",
+  "commands.openstarbound.humanoidParameters": "Beheert de parameters van de humanoïde.",
+  "commands.openstarbound.humanoidParameters.set": "Stelt de parameters van de humanoïde in.",
+  "commands.openstarbound.humanoidParameters.get": "Geeft de parameters van de humanoïde weer.",
   "commands.openstarbound.render": "Geeft een afbeelding van verscheidene onderdelen van jouw karakter, en slaat die op in de storage folder.",
 
   "commands.starcustomchat.clearchat": "Wist de chatgeschiedenis.",

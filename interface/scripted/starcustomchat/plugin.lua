@@ -123,6 +123,11 @@ function PluginClass:onModeToggle(mode, isChecked)
 
 end
 
+-- Called before the chat pane is hidden, including automatic hiding.
+function PluginClass:onChatClose()
+
+end
+
 function PluginClass:onTextboxCallback(chatText)
 
 end
@@ -169,6 +174,7 @@ function PluginClass:onMeasureMessage(message, drawData)
 end
 
 -- Called for visible messages after their final offset and height are known.
+-- drawData.imageRect contains the drawn image bounds in chat canvas coordinates.
 function PluginClass:onDrawMessage(message, drawData)
 
 end

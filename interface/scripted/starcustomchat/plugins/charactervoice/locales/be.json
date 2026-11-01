@@ -1,4 +1,5 @@
 {
+    "settings.plugins.charactervoice.embeddedSound": "Убудаваны гук",
     "settings.plugins.charactervoice": "Голас персанажа",
     "settings.plugins.charactervoice.enable": "Уключана",
     "settings.plugins.charactervoice.enablewhisper": "Гаворка ў ЛС",

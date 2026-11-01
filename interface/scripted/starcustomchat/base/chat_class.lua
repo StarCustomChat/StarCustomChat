@@ -61,6 +61,7 @@ function StarCustomChat:create (canvasWid, backgroundCanvasWid, highlightCanvasW
   o.textBox = Textbox:setup("imgTextbox", {
     onChanged = textboxCallback,
     onEnterKey = textboxEnterKey,
+    withEnterCallbacks = true,
     onEscapeKey = escapeTextbox,
     scroll = {
       scrollEnabled = true,
@@ -172,6 +173,12 @@ end
 
 function StarCustomChat:getColor(type)
   return self.colorTable[type] and "#" .. self.colorTable[type] or self.config.defaultColor
+end
+
+function StarCustomChat:getModeColor(mode)
+  local customColor = self.colorTable["mode." .. (mode or "default")]
+  return customColor and "#" .. customColor
+    or self.config.modeColors[mode] or self.config.modeColors.default
 end
 
 function StarCustomChat:calculateUUID(message)
@@ -609,6 +616,7 @@ end
 
 
 function StarCustomChat:highlightMessage(message, color)
+  if not message then return end
   for i = #self.drawnMessageIndexes, 1, -1 do 
     if message.uuid == self.messages[self.drawnMessageIndexes[i]].uuid then
       local y1, y2 = message.offset, message.offset + message.height + self.config.spacings.messages
@@ -734,6 +742,14 @@ function StarCustomChat:setFonts(fontTable)
 end
 
 
+function StarCustomChat:drawMessageImage(message, position, scale, drawData)
+  self.canvas:drawImage(message.image, position, scale)
+  if message.imageSize then
+    drawData.imageRect = {position[1], position[2],
+      position[1] + message.imageSize[1] * scale, position[2] + message.imageSize[2] * scale}
+  end
+end
+
 function StarCustomChat:processQueue()
   self.canvas:clear()
   self.totalHeight = 0
@@ -764,12 +780,14 @@ function StarCustomChat:processQueue()
       )
 
 
-    local text = self.chatMode == "modern" and message.text 
+    local imageScale = message.imageScale or self.config.fontSize / 10
+    local bodyText = message.image and "" or message.text
+    local text = self.chatMode == "modern" and bodyText
       or createNameForCompactMode(message.displayName or message.nickname, 
-        self.config.modeColors[messageMode] or self.config.modeColors.default, 
-        message.text, message.time, self:getColor("timetext"), self:getFont("timetext"))
+        self:getModeColor(messageMode),
+        bodyText, message.time, self:getColor("timetext"), self:getFont("timetext"))
 
-    if self.maxCharactersAllowed ~= 0 then
+    if not message.image and self.maxCharactersAllowed ~= 0 then
       local toCheckLength = message.collapsed == nil and true or message.collapsed
       text, message.isLong, message.collapsed = cutStringFromEnd(toCheckLength, text, self.maxCharactersAllowed)
       if toCheckLength then
@@ -777,10 +795,11 @@ function StarCustomChat:processQueue()
       end
     else
       message.collapsed = nil
+      message.isLong = nil
     end
 
     if not message.textHeight or self.recalculateHeight then
-      local sizeOfText = message.imageSize and vec2.div(message.imageSize, 10 / self.config.fontSize) or self:getTextSize(text)
+      local sizeOfText = message.imageSize and vec2.mul(message.imageSize, imageScale) or self:getTextSize(text)
 
       if not sizeOfText then return end 
 
@@ -824,7 +843,7 @@ function StarCustomChat:processQueue()
 
 
         if message.image then
-          self.canvas:drawImage(message.image, {nameOffset[1], messageOffset + drawData.bodyOffset}, 1 / 10 * self.config.fontSize)
+          self:drawMessageImage(message, {nameOffset[1], messageOffset + drawData.bodyOffset}, imageScale, drawData)
         else
           self.canvas:drawText(text, {
             position = {nameOffset[1], messageOffset + drawData.bodyOffset},
@@ -839,7 +858,7 @@ function StarCustomChat:processQueue()
         if message.avatar then
           local offset = {0, messageOffset + self.config.textOffsetFullMode[2] + messageBodyHeight - self.config.fontSize}
           message.avatarOffset = offset
-          self:drawIcon(message.portrait, message.displayName or message.nickname, offset, self.config.modeColors[messageMode], 
+          self:drawIcon(message.portrait, message.displayName or message.nickname, offset, self:getModeColor(messageMode),
             message.time, message.recipient)
         end
       end
@@ -858,7 +877,7 @@ function StarCustomChat:processQueue()
 
         else
           local text = createNameForCompactMode(message.displayName or message.nickname, 
-          self.config.modeColors[messageMode] or self.config.modeColors.default, 
+          self:getModeColor(messageMode),
             "", message.time, self:getColor("timetext"), self:getFont("timetext"))
           
           self.canvas:drawText(text, {
@@ -869,13 +888,13 @@ function StarCustomChat:processQueue()
           }, self.config.fontSize, message.color or self:getColor("chattext"), nil, self:getFont("chattext"))
 
           local nameWidth = self:getTextSize(text)
-          self.canvas:drawImage(message.image, {offset[1] + nameWidth[1], offset[2] + drawData.bodyOffset}, 1 / 10 * self.config.fontSize)
+          self:drawMessageImage(message, {offset[1] + nameWidth[1], offset[2] + drawData.bodyOffset}, imageScale, drawData)
         end
 
         if message.avatar then
           local squareSize = self.config.modeIndicatorSize
           local iconOffset = vec2.add(offset, {-1, message.height + self.config.spacings.name - 1})
-          self.canvas:drawRect({iconOffset[1], iconOffset[2], iconOffset[1] + squareSize, iconOffset[2] - self.config.fontSize + 2}, self.config.modeColors[messageMode])
+          self.canvas:drawRect({iconOffset[1], iconOffset[2], iconOffset[1] + squareSize, iconOffset[2] - self.config.fontSize + 2}, self:getModeColor(messageMode))
         end
       end
     end

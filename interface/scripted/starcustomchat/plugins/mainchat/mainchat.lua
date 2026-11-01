@@ -76,30 +76,35 @@ function mainchat:onCursorOverride(screenPosition)
 
     if isMouseOverPortrait(screenPosition, selectedMessage) and ((selectedMessage.mode == "RadioMessage" and selectedMessage.portrait) or self.customChat.savedPortraits[uuid]) then
       local portrait = self.customChat.savedPortraits[uuid] and self.customChat.savedPortraits[uuid].portrait or selectedMessage.portrait
-      
+      local frame = self.customChat.savedPortraits[uuid] and self.customChat.savedPortraits[uuid].frame or "/interface/scripted/starcustomchat/base/icons/frame.png"
+
       if type(portrait) == "string" then
         self.previewPlayerCanvas:clear()
 
         local portraitSize = starcustomchat.utils.safeImageSize(portrait)
         if portraitSize then
-          widget.setImageScale("lblPortraitPreview.background", portraitSize[1] / self.backImageSize[1] * self.customChat.config.portraitPreviewSize )
+          local previewSize = self.backImageSize[1] * self.customChat.config.portraitPreviewSize
+          widget.setImageScale("lblPortraitPreview.background", previewSize / self.backImageSize[1])
 
-          widget.setImageScale("lblPortraitPreview.portrait", self.customChat.config.portraitPreviewSize )
-          widget.setImage("lblPortraitPreview.portrait", portrait)
-          local frame = self.customChat.savedPortraits[uuid] and self.customChat.savedPortraits[uuid].frame or "/interface/scripted/starcustomchat/base/icons/frame.png"
+          widget.setImage("lblPortraitPreview.portrait", "")
+          widget.setSize("lblPortraitPreview.playerCanvas", {previewSize, previewSize})
+          self.previewPlayerCanvas:drawImageRect(portrait, {0, 0, portraitSize[1], portraitSize[2]}, {0, 0, previewSize, previewSize})
 
-          widget.setImageScale("lblPortraitPreview.frame", portraitSize[1] / root.imageSize(frame)[1] * self.customChat.config.portraitPreviewSize )
+          widget.setImageScale("lblPortraitPreview.frame", previewSize / root.imageSize(frame)[1])
           widget.setImage("lblPortraitPreview.frame", frame)
 
         end
       else--if table
         self.previewPlayerCanvas:clear()
+        widget.setSize("lblPortraitPreview.playerCanvas", {64, 64})
         widget.setImage("lblPortraitPreview.portrait", "")
         widget.setImageScale("lblPortraitPreview.background", self.customChat.config.defaultPortraitScale )
-        widget.setImage("lblPortraitPreview.frame", "/interface/scripted/starcustomchat/base/icons/frame.png")
-        widget.setImageScale("lblPortraitPreview.frame", self.customChat.config.defaultPortraitScale )
+        widget.setImage("lblPortraitPreview.frame", frame)
+        local frameSize = root.imageSize(frame)
+        widget.setImageScale("lblPortraitPreview.frame",
+          self.backImageSize[1] * self.customChat.config.defaultPortraitScale / frameSize[1])
 
-        for _, layer in ipairs(portrait) do
+        for _, layer in ipairs(portrait or {}) do
           self.previewPlayerCanvas:drawImage(layer.image, 
             self.customChat.savedPortraits[uuid].settings and self.customChat.savedPortraits[uuid].settings.offset or self.customChat.config.defaultPortraitOffset, 
             self.customChat.savedPortraits[uuid].settings and self.customChat.savedPortraits[uuid].settings.scale or self.customChat.config.defaultPortraitScale)

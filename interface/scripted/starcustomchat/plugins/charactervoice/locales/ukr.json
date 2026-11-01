@@ -1,4 +1,5 @@
 {
+    "settings.plugins.charactervoice.embeddedSound": "Вбудований звук",
     "settings.plugins.charactervoice": "Голос персонажа",
     "settings.plugins.charactervoice.enable": "Увімкнено",
     "settings.plugins.charactervoice.enablewhisper": "Балакати при ОП",
