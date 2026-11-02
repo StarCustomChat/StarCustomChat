@@ -1,9 +1,3 @@
 {
-    "chat.modes.Voice": "Czat głosowy",
-    "settings.plugins.voicechat": "Czat głosowy",
-    "settings.voice.binds.starextensions": "Konfiguracje przycisków wybiera się w /binds -> StarExtensions -> Czat Głosowy.\nUstawienia czatu głosowego znajdują się w /voice",
-    "settings.voice.binds.openstarbound": "Ustawienia czatu głosowego przeniesiono do Menu gry – Opcje – Ustawienia czatu głosowego",
-    "settings.voice.default_enable": "Włączony domyślnie",
-    "settings.voice.settings": "Ustawienia głosowe",
-    "settings.voice.binds_button": "Bindy"
+    "chat.modes.Voice": "Czat głosowy"
 }

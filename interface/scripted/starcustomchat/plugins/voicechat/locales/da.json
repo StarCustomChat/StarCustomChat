@@ -1,9 +1,3 @@
 {
-    "chat.modes.Voice": "Voicechat",
-    "settings.plugins.voicechat": "Voicechat",
-    "settings.voice.binds.starextensions": "Sneltoetsen kan je instellen in /binds -> StarExtensions -> Voice Chat.\nVoicechat instellingen vind je in /voice",
-    "settings.voice.binds.openstarbound": "Voice chat settings zijn verplaatst naar Game Menu -> Options -> Voice Chat Settings",
-    "settings.voice.default_enable": "Zet standaard aan",
-    "settings.voice.settings": "Voicechatinstellingen",
-    "settings.voice.binds_button": "Koppelingen"
+    "chat.modes.Voice": "Voicechat"
 }

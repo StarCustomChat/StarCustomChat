@@ -1,9 +1,3 @@
 {
-    "chat.modes.Voice": "Voice chat",
-    "settings.plugins.voicechat": "Voice chat",
-    "settings.voice.binds.starextensions": "Button configs are selected in /binds -> StarExtensions -> Voice Chat.\nVoice chat settings are located in /voice",
-    "settings.voice.binds.openstarbound": "Voice chat settings moved to Game Menu - Options - Voice Chat Settings",
-    "settings.voice.default_enable": "Turn on by default",
-    "settings.voice.settings": "Voice settings",
-    "settings.voice.binds_button": "Binds"
+    "chat.modes.Voice": "Voice chat"
 }

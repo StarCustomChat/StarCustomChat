@@ -1,9 +1,3 @@
 {
-    "chat.modes.Voice": "Sprachchat",
-    "settings.plugins.voicechat": "Sprachchat",
-    "settings.voice.binds.starextensions": "Tastenkonfigurationen festgelegt in /binds -> StarExtensions -> Voice Chat.\nSprachchat-Einstellungen in /voice",
-    "settings.voice.binds.openstarbound": "Sprachchat-Einstellungen im Spielmenü - Options - Voice Chat Settings",
-    "settings.voice.default_enable": "Standardmäßig aktivieren",
-    "settings.voice.settings": "Spracheinstellungen",
-    "settings.voice.binds_button": "Tastenbelegung"
+    "chat.modes.Voice": "Sprachchat"
 }

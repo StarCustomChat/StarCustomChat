@@ -1,9 +1,3 @@
 {
-    "chat.modes.Voice": "Голосовий чат",
-    "settings.plugins.voicechat": "Голосовий чат",
-    "settings.voice.binds.starextensions": "Змінити конфігурацію кнопок можна в /binds -> StarExtensions -> Voice Chat.\nНалаштування голосового чату знакодяться в /voice",
-    "settings.voice.binds.openstarbound": "Налаштування голосового чату перенесено до Game Menu - Options - Voice Chat Settings",
-    "settings.voice.default_enable": "Увімкнути за замовченням",
-    "settings.voice.settings": "Налаштування голосу",
-    "settings.voice.binds_button": "Прив'язки"
+    "chat.modes.Voice": "Голосовий чат"
 }
