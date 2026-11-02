@@ -1,9 +1,3 @@
 {
-    "chat.modes.Voice": "Chat vocal",
-    "settings.plugins.voicechat": "Chat vocal",
-    "settings.voice.binds.starextensions": "Les configurations des touches se trouvent dans /binds -> StarExtensions -> Voice Chat.\nLes paramètres du chat vocal sont situés dans /voice",
-    "settings.voice.binds.openstarbound": "Les paramètres du chat vocal ont été déplacés dans le menu du jeu - Options - Paramètres du chat vocal",
-    "settings.voice.default_enable": "Activer par défaut",
-    "settings.voice.settings": "Paramètres de la voix",
-    "settings.voice.binds_button": "Touches"
+    "chat.modes.Voice": "Chat vocal"
 }

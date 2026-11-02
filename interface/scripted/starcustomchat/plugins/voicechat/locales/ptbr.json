@@ -1,9 +1,3 @@
 {
-    "chat.modes.Voice": "Chat de voz",
-    "settings.plugins.voicechat": "Chat de voz",
-    "settings.voice.binds.starextensions": "Configurações de botões são selecionadas em /binds -> StarExtensions -> Voice Chat.\nConfigurações do chat de voz estão em /voice",
-    "settings.voice.binds.openstarbound": "Configurações do chat de voz movidas para o Menu do Jogo - Opções - Configurações de Chat de Voz",
-    "settings.voice.default_enable": "Deixar ligado",
-    "settings.voice.settings": "Configurações de voz",
-    "settings.voice.binds_button": "Teclas"
+    "chat.modes.Voice": "Chat de voz"
 }

@@ -1132,7 +1132,7 @@ function setMode(id, data)
 end
 
 function modeToggle(button, isChecked)
-  self.runCallbackForPlugins("onModeToggle", button, widget.getChecked(button))
+  self.runCallbackForPlugins("onModeToggle", button, widget.getChecked("lytModeFilter." .. button))
   self.customChat:processQueue()
 end
 

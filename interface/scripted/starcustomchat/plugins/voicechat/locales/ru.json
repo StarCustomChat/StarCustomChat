@@ -1,7 +1,3 @@
 {
-    "chat.modes.Voice": "Голосовой чат",
-    "settings.plugins.voicechat": "Голосовой чат",
-    "settings.voice.binds.starextensions": "Настройки кнопок выбираются в /binds -> StarExtensions -> Voice Chat.\nНастройки голосового чата StarExtensions находятся в /voice",
-    "settings.voice.binds.openstarbound": "Настройки голосового чата вынесены в Меню - Опции - Voice Chat Settings",
-    "settings.voice.default_enable": "Включать автоматически"
+    "chat.modes.Voice": "Голосовой чат"
 }

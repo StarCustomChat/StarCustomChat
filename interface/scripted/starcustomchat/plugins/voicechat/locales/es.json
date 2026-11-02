@@ -1,9 +1,3 @@
 {
-    "chat.modes.Voice": "Chat de voz",
-    "settings.plugins.voicechat": "Chat de voz",
-    "settings.voice.binds.starextensions": "La configuración de teclas se encuentra en /binds -> StarExtensions -> Chat de voz.\nLos ajustes del chat de voz están en /voice",
-    "settings.voice.binds.openstarbound": "La configuración del chat de voz se ha movido al Menú del Juego - Opciones - Configuración de Chat de Voz",
-    "settings.voice.default_enable": "Activar por defecto",
-    "settings.voice.settings": "Ajustes de voz",
-    "settings.voice.binds_button": "Teclas rápidas"
+    "chat.modes.Voice": "Chat de voz"
 }
