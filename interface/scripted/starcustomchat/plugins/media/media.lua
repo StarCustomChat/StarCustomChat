@@ -58,7 +58,7 @@ function media:formatOutcomingMessage(message)
     message.silent = true
     message.data = message.data or {}
     message.data.media = message.text
-    message.text = "[media]"
+    message.text = "[media " .. sb.makeUuid() .. "]"
   end
   return message
 end
