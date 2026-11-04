@@ -63,6 +63,17 @@ end
 function media:formatOutcomingMessage(message)
   if self:getMedia(message) then
     message.silent = true
+    message.data = message.data or {}
+    message.data.media = message.text
+    message.text = "[media]"
+  end
+  return message
+end
+
+function media:formatIncomingMessage(message)
+  local media = type(message.data) == "table" and message.data.media
+  if type(media) == "string" and self:getMedia(message, media) then
+    message.text = media
   end
   return message
 end
@@ -257,17 +268,6 @@ function media:update(dt)
   end
   -- Frame sizes are constant, so retain layout and redraw only once.
   if redraw then self.customChat:processQueue() end
-end
-
-function media:onSettingsUpdate()
-  self:stopSound()
-  self:_loadConfig()
-  self.cache = setmetatable({}, {__mode = "k"})
-  self:loadSoundImages()
-  for _, message in ipairs(self.customChat.messages) do
-    self:onReceiveMessage(message)
-  end
-  self.customChat:processQueue()
 end
 
 function media:onChatClose()
