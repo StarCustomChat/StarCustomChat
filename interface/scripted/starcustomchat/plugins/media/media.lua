@@ -33,8 +33,7 @@ function media:getMedia(message, text)
   text = text or message.text
   local cached = self.cache[message]
   if not cached or cached.text ~= text then
-    local ok, value, reason = pcall(SCCMediaMetadata.inspect, text, self.maxImageSize, self.maxSoundDuration,
-      self.maxGifFrames, self.maxGifDuration)
+    local ok, value, reason = pcall(SCCMediaMetadata.inspect, text, self.maxFileSize)
     cached = {text = text, value = ok and value or false, reason = ok and reason or nil}
     self.cache[message] = cached
   end
@@ -43,14 +42,8 @@ end
 
 function media:preventTextboxCallback(message)
   local _, reason = self:getMedia(message)
-  if reason == "image_too_large" then
-    starcustomchat.utils.alert("media.image_too_large", self.maxImageSize[1], self.maxImageSize[2])
-  elseif reason == "sound_too_long" then
-    starcustomchat.utils.alert("media.sound_too_long", self.maxSoundDuration)
-  elseif reason == "gif_too_many_frames" then
-    starcustomchat.utils.alert("media.gif_too_many_frames", self.maxGifFrames)
-  elseif reason == "gif_too_long" then
-    starcustomchat.utils.alert("media.gif_too_long", self.maxGifDuration)
+  if reason == "file_too_large" then
+    starcustomchat.utils.alert("media.file_too_large", self.maxFileSize)
   elseif reason == "gif_invalid" then
     starcustomchat.utils.alert("media.gif_invalid")
   else

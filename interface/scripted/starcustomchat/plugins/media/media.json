@@ -1,10 +1,7 @@
 {
   "name": "Media",
   "parameters": {
-    "maxImageSize": [128, 128],
-    "maxSoundDuration": 30,
-    "maxGifFrames": 300,
-    "maxGifDuration": 30,
+    "maxFileSize": 512000,
     "soundImages": {
       "play": "/interface/scripted/starcustomchat/plugins/media/images/sound.png:play",
       "stop": "/interface/scripted/starcustomchat/plugins/media/images/sound.png:stop"

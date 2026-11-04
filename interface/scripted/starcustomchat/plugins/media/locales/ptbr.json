@@ -1,10 +1,7 @@
 {
-  "media.image_too_large": "Imagem não enviada. Dimensões máximas: %s × %s pixels.",
-  "media.sound_too_long": "Áudio não enviado. Duração máxima: %s segundos.",
+  "media.file_too_large": "Mídia não enviada. Tamanho máximo do arquivo: %s bytes.",
   "media.play": "Reproduzir áudio (%.1f s)",
   "media.stop": "Parar áudio",
   "media.playback_error": "Não foi possível reproduzir este áudio.",
-  "media.gif_too_many_frames": "GIF não enviado. Número máximo de quadros: %s.",
-  "media.gif_too_long": "GIF não enviado. Duração máxima por ciclo: %s segundos.",
   "media.gif_invalid": "GIF não enviado. Este GIF está danificado ou usa recursos não compatíveis."
 }

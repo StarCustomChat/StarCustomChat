@@ -1,10 +1,7 @@
 {
-  "media.image_too_large": "Bild nicht gesendet. Maximale Abmessungen: %s × %s Pixel.",
-  "media.sound_too_long": "Audio nicht gesendet. Maximale Dauer: %s Sekunden.",
+  "media.file_too_large": "Medium nicht gesendet. Maximale Dateigröße: %s Byte.",
   "media.play": "Audio abspielen (%.1f s)",
   "media.stop": "Audio stoppen",
   "media.playback_error": "Diese Audiodatei konnte nicht abgespielt werden.",
-  "media.gif_too_many_frames": "GIF nicht gesendet. Maximale Anzahl der Einzelbilder: %s.",
-  "media.gif_too_long": "GIF nicht gesendet. Maximale Dauer pro Durchlauf: %s Sekunden.",
   "media.gif_invalid": "GIF nicht gesendet. Diese GIF-Datei ist beschädigt oder verwendet nicht unterstützte Funktionen."
 }
