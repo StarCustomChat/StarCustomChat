@@ -3,3 +3,4 @@ Changed the way media are being sent. Instead of sending the whole string as a t
 Changed the limits of the medias from length and dimensions to byte sizes.
 
 ## Features
+Increased the Character Voice length to 4 seconds. Use this power for good, never for evil!

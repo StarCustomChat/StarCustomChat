@@ -205,7 +205,7 @@
   },
 
   "parameters": {
-    "cutoffTime": 2
+    "cutoffTime": 4
   },
 
   "script": "/interface/scripted/starcustomchat/plugins/charactervoice/charactervoice.lua",
