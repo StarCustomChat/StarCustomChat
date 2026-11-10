@@ -48,7 +48,7 @@ function typing:buildTypingText(typingPlayers)
 
     if entityId and world.entityExists(entityId) or entityId == 0 then
       local entityPosition = world.entityPosition(entityId == 0 and player.id() or entityId)  -- if it's a server, the position of the server is the same as the player
-      if entityPosition then
+      if entityPosition and localPosition then
         local distance = world.magnitude(entityPosition, localPosition)
         table.insert(typingPlayerEntries, {
           name = self.customChat.callbackPlugins("resolvePlayerData", playerData).name or "Unknown",
