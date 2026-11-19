@@ -56,8 +56,8 @@ local function lzw(data, minimum, expected, checkpoint)
   end
 end
 
--- Parse all frame descriptors and enforce limits before decoding any pixels.
-local function parse(data, maxSize, maxFrames, maxDuration)
+-- Parse all frame descriptors before decoding any pixels.
+local function parse(data)
   local offset = 7
   local function read(size)
     if offset + size - 1 > #data then invalid() end
@@ -83,7 +83,6 @@ local function parse(data, maxSize, maxFrames, maxDuration)
   end
   local width, height, flags, background = string.unpack("<I2I2BBB", read(7))
   if width == 0 or height == 0 then invalid() end
-  if width > maxSize[1] or height > maxSize[2] then return nil, "image_too_large" end
   local globalPalette = palette(flags)
   local result = {kind = "animation", size = {width, height}, frames = {}, duration = 0, plays = 1,
     background = globalPalette and globalPalette[background] or "\0\0\0\0"}
@@ -117,7 +116,6 @@ local function parse(data, maxSize, maxFrames, maxDuration)
         blocks() -- Comments and extensions unknown to this decoder.
       end
     elseif marker == 0x2c then
-      if #result.frames >= maxFrames then return nil, "gif_too_many_frames" end
       local x, y, w, h, packed = string.unpack("<I2I2I2I2B", read(9))
       if w == 0 or h == 0 or x + w > width or y + h > height or packed & 24 ~= 0 then invalid() end
       local colors = palette(packed) or globalPalette
@@ -127,7 +125,6 @@ local function parse(data, maxSize, maxFrames, maxDuration)
         minimum = byte(), compressed = blocks()}
       if frame.minimum < 2 or frame.minimum > 8 then invalid() end
       result.duration = result.duration + (control.delay or 10)
-      if result.duration > maxDuration * 100 then return nil, "gif_too_long" end
       frame.endsAt = result.duration / 100
       result.frames[#result.frames + 1], control = frame, {}
     else
@@ -218,8 +215,8 @@ local function render(result)
   result.background = nil
 end
 
-function SCCMediaGif.inspect(data, maxSize, maxFrames, maxDuration)
-  local ok, result, reason = pcall(parse, data, maxSize, maxFrames or 300, maxDuration or 30)
+function SCCMediaGif.inspect(data)
+  local ok, result, reason = pcall(parse, data)
   if not ok then return nil, "gif_invalid" end
   if result then
     result.duration = result.duration / 100

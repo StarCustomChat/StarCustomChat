@@ -29,5 +29,5 @@ function sccTalkingSound(soundData)
 end
 
 function uninit()
-
+  animator.stopAllSounds(self.soundName)
 end

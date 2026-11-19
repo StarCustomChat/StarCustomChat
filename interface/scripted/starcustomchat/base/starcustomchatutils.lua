@@ -157,10 +157,10 @@ end
 function starcustomchat.utils.clearPortraitFromInvisibleLayers(portrait)
   if portrait and type(portrait) == "table" then
     local filteredPortrait = {}
-    for _, layer in ipairs(portrait) do 
+    for _, layer in ipairs(portrait) do
       local imageSize = root.imageSize(layer.image)
       if layer.image and not vec2.eq(imageSize, {0, 0}) and not string.find(layer.image, "?crop.?0;0;0") and not string.match(layer.image, "^?multiply.?000;?$") then
-        
+
         -- Set the idle emote
         if string.find(layer.image, "/emote.png") then
           layer.image = string.gsub(layer.image, ":%w+%.%d", ":idle.1")
@@ -225,7 +225,10 @@ end
 
 function starcustomchat.utils.playersInRadius(radius, ignoreUs, nearest)
   radius = radius or 100
-  return world.playerQuery(world.entityPosition(player.id()), radius, {
+  -- a dead player has no position, nobody is in range
+  local position = world.entityPosition(player.id())
+  if not position then return {} end
+  return world.playerQuery(position, radius, {
     withoutEntityId = ignoreUs and player.id() or nil,
     order = nearest and "nearest"
   } or nil)

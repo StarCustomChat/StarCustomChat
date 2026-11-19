@@ -33,8 +33,7 @@ function media:getMedia(message, text)
   text = text or message.text
   local cached = self.cache[message]
   if not cached or cached.text ~= text then
-    local ok, value, reason = pcall(SCCMediaMetadata.inspect, text, self.maxImageSize, self.maxSoundDuration,
-      self.maxGifFrames, self.maxGifDuration)
+    local ok, value, reason = pcall(SCCMediaMetadata.inspect, text, self.maxFileSize, self.maxImageSize)
     cached = {text = text, value = ok and value or false, reason = ok and reason or nil}
     self.cache[message] = cached
   end
@@ -43,14 +42,10 @@ end
 
 function media:preventTextboxCallback(message)
   local _, reason = self:getMedia(message)
-  if reason == "image_too_large" then
+  if reason == "file_too_large" then
+    starcustomchat.utils.alert("media.file_too_large", self.maxFileSize)
+  elseif reason == "image_too_large" then
     starcustomchat.utils.alert("media.image_too_large", self.maxImageSize[1], self.maxImageSize[2])
-  elseif reason == "sound_too_long" then
-    starcustomchat.utils.alert("media.sound_too_long", self.maxSoundDuration)
-  elseif reason == "gif_too_many_frames" then
-    starcustomchat.utils.alert("media.gif_too_many_frames", self.maxGifFrames)
-  elseif reason == "gif_too_long" then
-    starcustomchat.utils.alert("media.gif_too_long", self.maxGifDuration)
   elseif reason == "gif_invalid" then
     starcustomchat.utils.alert("media.gif_invalid")
   else
@@ -63,6 +58,17 @@ end
 function media:formatOutcomingMessage(message)
   if self:getMedia(message) then
     message.silent = true
+    message.data = message.data or {}
+    message.data.media = message.text
+    message.text = "[media " .. sb.makeUuid() .. "]"
+  end
+  return message
+end
+
+function media:formatIncomingMessage(message)
+  local media = type(message.data) == "table" and message.data.media
+  if type(media) == "string" and self:getMedia(message, media) then
+    message.text = media
   end
   return message
 end
@@ -257,17 +263,6 @@ function media:update(dt)
   end
   -- Frame sizes are constant, so retain layout and redraw only once.
   if redraw then self.customChat:processQueue() end
-end
-
-function media:onSettingsUpdate()
-  self:stopSound()
-  self:_loadConfig()
-  self.cache = setmetatable({}, {__mode = "k"})
-  self:loadSoundImages()
-  for _, message in ipairs(self.customChat.messages) do
-    self:onReceiveMessage(message)
-  end
-  self.customChat:processQueue()
 end
 
 function media:onChatClose()
