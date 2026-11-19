@@ -1,5 +1,6 @@
 {
   "media.file_too_large": "File multimediale non inviato. Dimensione massima del file: %s byte.",
+  "media.image_too_large": "Immagine non inviata. Dimensioni massime dell'immagine: %s x %s pixel.",
   "media.play": "Riproduci audio (%.1f s)",
   "media.stop": "Interrompi audio",
   "media.playback_error": "Impossibile riprodurre questo audio.",

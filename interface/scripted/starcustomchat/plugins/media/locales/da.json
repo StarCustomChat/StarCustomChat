@@ -1,5 +1,6 @@
 {
   "media.file_too_large": "Medie ikke sendt. Maksimal filstørrelse: %s bytes.",
+  "media.image_too_large": "Billedet blev ikke sendt. Maksimale billedmål: %s x %s pixels.",
   "media.play": "Audio afspelen (%.1f s)",
   "media.stop": "Audio stoppen",
   "media.playback_error": "Deze audio kon niet worden afgespeeld.",

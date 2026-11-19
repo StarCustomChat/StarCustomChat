@@ -125,7 +125,12 @@ local function oggDuration(data)
   return duration
 end
 
-function SCCMediaMetadata.inspect(text, maxFileSize)
+local function exceedsImageSize(size, maxImageSize)
+  return type(maxImageSize) == "table" and maxImageSize[1] and maxImageSize[2]
+    and (size[1] > maxImageSize[1] or size[2] > maxImageSize[2])
+end
+
+function SCCMediaMetadata.inspect(text, maxFileSize, maxImageSize)
   local path, base, suffix = SCCMediaMetadata.path(text)
   if not path then return end
   -- Explicitly allow embedded bytes for metadata only; never execute them.
@@ -135,12 +140,15 @@ function SCCMediaMetadata.inspect(text, maxFileSize)
   if data:sub(1, 6) == "GIF87a" or data:sub(1, 6) == "GIF89a" then
     -- A GIF carries its own frames; asset frame selectors/directives do not apply.
     if suffix ~= "" or not base:match("^/opensb_data;bin;") then return nil, "gif_invalid" end
-    return SCCMediaGif.inspect(data)
+    local image, reason = SCCMediaGif.inspect(data)
+    if image and exceedsImageSize(image.size, maxImageSize) then return nil, "image_too_large" end
+    return image, reason
   end
   if data:sub(1, 8) == "\137PNG\13\10\26\10" then
     if #data < 33 or data:sub(13, 16) ~= "IHDR" then return end
     local width, height = string.unpack(">I4I4", data, 17)
     if width == 0 or height == 0 then return end
+    if exceedsImageSize({width, height}, maxImageSize) then return nil, "image_too_large" end
     local size = root.assetImage(path):size()
     if size[1] <= 0 or size[2] <= 0 then return end
     return {kind = "image", path = path, size = size}

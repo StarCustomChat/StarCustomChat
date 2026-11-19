@@ -2,6 +2,7 @@
   "name": "Media",
   "parameters": {
     "maxFileSize": 512000,
+    "maxImageSize": [255, 255],
     "soundImages": {
       "play": "/interface/scripted/starcustomchat/plugins/media/images/sound.png:play",
       "stop": "/interface/scripted/starcustomchat/plugins/media/images/sound.png:stop"

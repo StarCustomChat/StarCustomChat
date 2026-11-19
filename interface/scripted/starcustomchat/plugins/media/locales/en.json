@@ -1,5 +1,6 @@
 {
   "media.file_too_large": "Media not sent. Maximum file size: %s bytes.",
+  "media.image_too_large": "Image not sent. Maximum image dimensions: %s x %s pixels.",
   "media.play": "Play audio (%.1f s)",
   "media.stop": "Stop audio",
   "media.playback_error": "This audio could not be played.",

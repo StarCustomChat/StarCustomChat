@@ -1,5 +1,6 @@
 {
   "media.file_too_large": "Média non envoyé. Taille maximale du fichier : %s octets.",
+  "media.image_too_large": "Image non envoyée. Dimensions maximales de l’image : %s x %s pixels.",
   "media.play": "Lire l'audio (%.1f s)",
   "media.stop": "Arrêter l'audio",
   "media.playback_error": "Impossible de lire ce fichier audio.",

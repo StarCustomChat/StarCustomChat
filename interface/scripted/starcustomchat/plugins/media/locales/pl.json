@@ -1,5 +1,6 @@
 {
   "media.file_too_large": "Nie wysłano pliku multimedialnego. Maksymalny rozmiar pliku: %s bajtów.",
+  "media.image_too_large": "Nie wysłano obrazu. Maksymalne wymiary obrazu: %s x %s pikseli.",
   "media.play": "Odtwórz dźwięk (%.1f s)",
   "media.stop": "Zatrzymaj dźwięk",
   "media.playback_error": "Nie udało się odtworzyć tego dźwięku.",
